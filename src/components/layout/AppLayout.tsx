@@ -27,7 +27,7 @@ export function AppLayout() {
             </main>
 
             {/* Bottom Navigation */}
-            <nav className="h-[60px] bg-white/90 backdrop-blur-md border-t border-pink-border/50 flex items-center justify-around shrink-0 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
+            <nav className="h-[60px] bg-white/90 backdrop-blur-md border-t border-border-soft/50 flex items-center justify-around shrink-0 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
 
                 <button
                     onClick={() => setActiveTab('timeline')}

@@ -100,7 +100,7 @@ export function HistoryView({ onNavigateToToday }: HistoryViewProps) {
 
             {history.length === 0 ? (
                 <div className="px-6 py-20 flex flex-col items-center text-center">
-                    <div className="w-16 h-16 bg-pink-soft rounded-full mb-6 flex items-center justify-center text-accent text-2xl border border-pink-border">
+                    <div className="w-16 h-16 bg-bg-soft rounded-full mb-6 flex items-center justify-center text-accent text-2xl border border-border-soft">
                         📝
                     </div>
                     <h2 className="text-xl font-bold text-text-main mb-3">还没有记录</h2>
@@ -109,7 +109,7 @@ export function HistoryView({ onNavigateToToday }: HistoryViewProps) {
                     </p>
                     <button
                         onClick={onNavigateToToday}
-                        className="px-6 py-3 bg-white border border-primary rounded-full text-sm font-medium text-primary hover:bg-pink-panel transition-colors shadow-sm"
+                        className="px-6 py-3 bg-white border border-primary rounded-full text-sm font-medium text-primary hover:bg-bg-panel transition-colors shadow-sm"
                     >
                         去今天看看
                     </button>
@@ -148,7 +148,7 @@ export function HistoryView({ onNavigateToToday }: HistoryViewProps) {
                         <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
                             {/* Time Select */}
                             <select
-                                className="text-xs bg-white border border-pink-border rounded-lg px-2 py-1.5 focus:outline-none focus:border-primary text-text-main"
+                                className="text-xs bg-white border border-border-soft rounded-lg px-2 py-1.5 focus:outline-none focus:border-primary text-text-main"
                                 value={filterRange}
                                 onChange={(e) => setFilterRange(e.target.value as any)}
                             >
@@ -159,7 +159,7 @@ export function HistoryView({ onNavigateToToday }: HistoryViewProps) {
 
                             {/* Energy Select */}
                             <select
-                                className="text-xs bg-white border border-pink-border rounded-lg px-2 py-1.5 focus:outline-none focus:border-primary text-text-main"
+                                className="text-xs bg-white border border-border-soft rounded-lg px-2 py-1.5 focus:outline-none focus:border-primary text-text-main"
                                 value={filterEnergy}
                                 onChange={(e) => setFilterEnergy(e.target.value as any)}
                             >
@@ -171,7 +171,7 @@ export function HistoryView({ onNavigateToToday }: HistoryViewProps) {
 
                             {/* Tag Select */}
                             <select
-                                className="text-xs bg-white border border-pink-border rounded-lg px-2 py-1.5 focus:outline-none focus:border-primary text-text-main max-w-[120px]"
+                                className="text-xs bg-white border border-border-soft rounded-lg px-2 py-1.5 focus:outline-none focus:border-primary text-text-main max-w-[120px]"
                                 value={filterTag}
                                 onChange={(e) => setFilterTag(e.target.value)}
                             >
@@ -214,7 +214,7 @@ export function HistoryView({ onNavigateToToday }: HistoryViewProps) {
 export function WeeklyOverviewCard({ stats }: { stats: WeeklyStats | null }) {
     if (!stats) {
         return (
-            <div className="bg-white rounded-2xl border border-pink-border p-4 text-center shadow-sm mb-4">
+            <div className="bg-white rounded-2xl border border-border-soft p-4 text-center shadow-sm mb-4">
                 <div className="text-sm font-semibold text-text-main mb-1">本周脸部概览</div>
                 <p className="text-xs text-text-subtle">再多记录几天，我们就能为你生成一张“本周脸部概览”。</p>
             </div>
@@ -224,10 +224,10 @@ export function WeeklyOverviewCard({ stats }: { stats: WeeklyStats | null }) {
     const { title, description, tips } = buildWeeklySummary(stats);
 
     return (
-        <div className="bg-white rounded-3xl border border-pink-border shadow-sm p-5 mb-4">
+        <div className="bg-white rounded-3xl border border-border-soft shadow-sm p-5 mb-4">
             <div className="flex items-center justify-between mb-3">
                 <h3 className="text-base font-semibold text-text-main">本周脸部概览</h3>
-                <span className="text-xs text-text-subtle bg-pink-soft px-2 py-0.5 rounded-full border border-pink-border/50">
+                <span className="text-xs text-text-subtle bg-bg-soft px-2 py-0.5 rounded-full border border-border-soft/50">
                     基于最近 {stats.count} 次记录
                 </span>
             </div>
@@ -273,14 +273,22 @@ function HistoryCard({ record, onDelete, onClick }: HistoryCardProps) {
     return (
         <div
             onClick={onClick}
-            className="bg-white p-3 rounded-2xl border border-pink-border shadow-soft flex items-start gap-4 active:scale-[0.98] transition-transform cursor-pointer relative group"
+            className="bg-white p-3 rounded-2xl border border-border-soft shadow-soft flex items-start gap-4 active:scale-[0.98] transition-transform cursor-pointer relative group"
         >
             {/* Thumbnail */}
-            <img
-                src={record.thumbnail}
-                alt="Face"
-                className="w-14 h-14 rounded-full object-cover border border-pink-border flex-shrink-0"
-            />
+            {record.thumbnail.includes('camera_icon_custom') ? (
+                <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center text-primary border border-border-soft flex-shrink-0">
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+            ) : (
+                <img
+                    src={record.thumbnail}
+                    alt="Face"
+                    className="w-14 h-14 rounded-full object-cover border border-border-soft flex-shrink-0"
+                />
+            )}
 
             <div className="flex-1 min-w-0 pr-6">
                 {/* Header Line */}
@@ -301,7 +309,7 @@ function HistoryCard({ record, onDelete, onClick }: HistoryCardProps) {
                 {/* Tags */}
                 <div className="flex flex-wrap gap-1.5 mb-3">
                     {record.emotion.tags.map(tag => (
-                        <span key={tag} className="px-2 py-0.5 bg-pink-soft text-text-subtle text-[10px] font-medium rounded-md border border-pink-border/50">
+                        <span key={tag} className="px-2 py-0.5 bg-bg-soft text-text-subtle text-[10px] font-medium rounded-md border border-border-soft/50">
                             #{tag}
                         </span>
                     ))}
@@ -309,7 +317,7 @@ function HistoryCard({ record, onDelete, onClick }: HistoryCardProps) {
 
                 {/* Note (if exists) */}
                 {record.note && record.note.trim() !== '' && (
-                    <div className="bg-pink-panel/50 p-2.5 rounded-xl border border-pink-border/30 mt-2">
+                    <div className="bg-bg-panel/50 p-2.5 rounded-xl border border-border-soft/30 mt-2">
                         <div className="text-[10px] text-text-subtle mb-1">那天写下的一句话：</div>
                         <p className="text-sm text-text-main leading-relaxed">
                             {record.note}
@@ -353,7 +361,7 @@ export function HistoryDetailOverlay({ record, onClose, onSaveNote }: HistoryDet
     return (
         <div className="fixed inset-0 z-50 bg-gray-50/95 backdrop-blur-sm overflow-y-auto animate-fade-in flex flex-col">
             {/* Header */}
-            <div className="sticky top-0 bg-white/90 backdrop-blur border-b border-pink-border px-4 py-3 flex items-center justify-between z-10 shadow-sm">
+            <div className="sticky top-0 bg-white/90 backdrop-blur border-b border-border-soft px-4 py-3 flex items-center justify-between z-10 shadow-sm">
                 <button
                     onClick={onClose}
                     className="text-sm font-medium text-primary flex items-center gap-1"
@@ -371,32 +379,40 @@ export function HistoryDetailOverlay({ record, onClose, onSaveNote }: HistoryDet
             <div className="p-4 pb-24 space-y-6 max-w-md mx-auto w-full">
                 {/* Top Section */}
                 <div className="flex flex-col items-center gap-4">
-                    <img
-                        src={record.thumbnail}
-                        alt="Face"
-                        className="w-24 h-24 rounded-3xl object-cover border-2 border-pink-border shadow-soft"
-                    />
+                    {record.thumbnail.includes('camera_icon_custom') ? (
+                        <div className="w-24 h-24 rounded-3xl bg-white flex items-center justify-center text-primary shadow-soft border border-border-soft">
+                            <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                    ) : (
+                        <img
+                            src={record.thumbnail}
+                            alt="Face"
+                            className="w-24 h-24 rounded-3xl object-cover border-2 border-border-soft shadow-soft"
+                        />
+                    )}
                 </div>
 
                 {/* 1. Emotion */}
-                <section className="bg-white p-5 rounded-2xl shadow-soft border border-pink-border">
+                <section className="bg-white p-5 rounded-2xl shadow-soft border border-border-soft">
                     <h3 className="text-xs font-bold uppercase tracking-wider text-primary mb-3">01 情绪快照</h3>
                     <p className="text-lg font-medium text-text-main mb-6 leading-snug">
                         "{record.emotion.summary}"
                     </p>
                     <div className="flex flex-wrap gap-2 mb-6">
                         {record.emotion.tags.map(tag => (
-                            <span key={tag} className="px-3 py-1 bg-pink-panel text-primary text-xs font-medium rounded-full">
+                            <span key={tag} className="px-3 py-1 bg-bg-panel text-primary text-xs font-medium rounded-full">
                                 #{tag}
                             </span>
                         ))}
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-pink-soft p-3 rounded-2xl border border-pink-border/50">
+                        <div className="bg-bg-soft p-3 rounded-2xl border border-border-soft/50">
                             <span className="text-xs text-text-subtle">精力值</span>
                             <div className="text-xl font-bold text-text-main">{record.emotion.energy_level}/10</div>
                         </div>
-                        <div className="bg-pink-soft p-3 rounded-2xl border border-pink-border/50">
+                        <div className="bg-bg-soft p-3 rounded-2xl border border-border-soft/50">
                             <span className="text-xs text-text-subtle">心情亮度</span>
                             <div className="text-xl font-bold text-text-main">{record.emotion.mood_brightness}/10</div>
                         </div>
@@ -404,7 +420,7 @@ export function HistoryDetailOverlay({ record, onClose, onSaveNote }: HistoryDet
                 </section>
 
                 {/* 2. Lifestyle */}
-                <section className="bg-white p-5 rounded-2xl shadow-soft border border-pink-border">
+                <section className="bg-white p-5 rounded-2xl shadow-soft border border-border-soft">
                     <h3 className="text-xs font-bold uppercase tracking-wider text-primary mb-3">02 皮肤与生活方式</h3>
                     <ul className="space-y-2 mb-4">
                         {record.lifestyle.signals.map((signal, idx) => (
@@ -416,7 +432,7 @@ export function HistoryDetailOverlay({ record, onClose, onSaveNote }: HistoryDet
                     </ul>
                     <div className="space-y-2">
                         {record.lifestyle.suggestions.map((sugg, idx) => (
-                            <li key={idx} className="bg-pink-soft/50 p-2 rounded-lg text-sm text-text-subtle flex items-start gap-2">
+                            <li key={idx} className="bg-bg-soft/50 p-2 rounded-lg text-sm text-text-subtle flex items-start gap-2">
                                 <span className="text-accent mt-0.5">✓</span>
                                 {sugg}
                             </li>
@@ -425,14 +441,14 @@ export function HistoryDetailOverlay({ record, onClose, onSaveNote }: HistoryDet
                 </section>
 
                 {/* 3. Reflection */}
-                <section className="bg-white p-5 rounded-2xl shadow-soft border border-pink-border">
+                <section className="bg-white p-5 rounded-2xl shadow-soft border border-border-soft">
                     <h3 className="text-xs font-bold uppercase tracking-wider text-primary mb-3">03 自我观察与提问</h3>
-                    <p className="italic text-text-subtle mb-4 text-sm border-l-2 border-pink-border pl-3">
+                    <p className="italic text-text-subtle mb-4 text-sm border-l-2 border-border-soft pl-3">
                         {record.reflection.summary}
                     </p>
                     <ul className="space-y-2">
                         {questions.map((q, idx) => (
-                            <li key={idx} className="bg-pink-panel p-3 rounded-2xl text-sm text-text-main border border-pink-border">
+                            <li key={idx} className="bg-bg-panel p-3 rounded-2xl text-sm text-text-main border border-border-soft">
                                 {q}
                             </li>
                         ))}
@@ -440,14 +456,14 @@ export function HistoryDetailOverlay({ record, onClose, onSaveNote }: HistoryDet
                 </section>
 
                 {/* 3.5 Micro-Practices (New) */}
-                <section className="bg-white p-5 rounded-2xl shadow-soft border border-pink-border">
+                <section className="bg-white p-5 rounded-2xl shadow-soft border border-border-soft">
                     <h3 className="text-xs font-bold uppercase tracking-wider text-primary mb-3">04 今天的小练习</h3>
                     <p className="text-xs text-text-subtle mb-4">
                         这是针对当时状态的小建议：
                     </p>
                     <div className="space-y-3">
                         {practices.map((practice, idx) => (
-                            <div key={idx} className="flex items-start gap-3 bg-pink-soft/30 p-3 rounded-2xl border border-pink-border/50">
+                            <div key={idx} className="flex items-start gap-3 bg-bg-soft/30 p-3 rounded-2xl border border-border-soft/50">
                                 <span className="text-lg">🌱</span>
                                 <span className="text-sm text-text-main leading-relaxed">{practice}</span>
                             </div>
@@ -456,10 +472,10 @@ export function HistoryDetailOverlay({ record, onClose, onSaveNote }: HistoryDet
                 </section>
 
                 {/* 4. Note (Editable) */}
-                <section className="bg-white p-5 rounded-2xl shadow-soft border border-pink-border">
+                <section className="bg-white p-5 rounded-2xl shadow-soft border border-border-soft">
                     <h3 className="text-xs font-bold uppercase tracking-wider text-primary mb-3">05 今天写下的一句话</h3>
                     <textarea
-                        className="w-full text-sm text-text-main p-3 rounded-2xl border border-pink-border bg-white focus:outline-none focus:ring-1 focus:ring-primary/50 resize-none min-h-[80px]"
+                        className="w-full text-sm text-text-main p-3 rounded-2xl border border-border-soft bg-white focus:outline-none focus:ring-1 focus:ring-primary/50 resize-none min-h-[80px]"
                         rows={3}
                         placeholder="例：那天其实挺累的，但我还是好好照顾了自己。"
                         value={note}
@@ -477,7 +493,7 @@ export function HistoryDetailOverlay({ record, onClose, onSaveNote }: HistoryDet
                 <div className="flex flex-col gap-3 pt-4 pb-8">
                     <button
                         onClick={() => setShowShare(true)}
-                        className="w-full py-3.5 bg-white text-primary border border-pink-200 rounded-2xl font-bold shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2"
+                        className="w-full py-3.5 bg-white text-primary border border-accent rounded-2xl font-bold shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2"
                     >
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
@@ -487,7 +503,7 @@ export function HistoryDetailOverlay({ record, onClose, onSaveNote }: HistoryDet
 
                     <button
                         onClick={onClose}
-                        className="w-full py-4 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-pink-200 active:scale-95 transition-all flex items-center justify-center gap-2"
+                        className="w-full py-4 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-soft active:scale-95 transition-all flex items-center justify-center gap-2"
                     >
                         <span>返回时间线</span>
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

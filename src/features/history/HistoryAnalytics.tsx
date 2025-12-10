@@ -95,7 +95,7 @@ export function TrendChartCard({ history }: AnalyticsProps) {
 
     if (chartData.length === 0) {
         return (
-            <div className="bg-white rounded-2xl border border-pink-border shadow-sm p-4 mb-4 flex flex-col items-center justify-center min-h-[200px]">
+            <div className="bg-white rounded-2xl border border-border-soft shadow-sm p-4 mb-4 flex flex-col items-center justify-center min-h-[200px]">
                 <div className="text-sm font-semibold text-text-main mb-1">精力与心情趋势</div>
                 <div className="flex bg-gray-100 rounded-lg p-0.5 mb-6">
                     <button onClick={() => setRange(7)} className={`px-3 py-1 text-xs rounded-md transition-colors ${range === 7 ? 'bg-white shadow-sm text-primary font-medium' : 'text-text-subtle'}`}>最近 7 天</button>
@@ -107,7 +107,7 @@ export function TrendChartCard({ history }: AnalyticsProps) {
     }
 
     return (
-        <div className="bg-white rounded-2xl border border-pink-border shadow-sm p-4 mb-4">
+        <div className="bg-white rounded-2xl border border-border-soft shadow-sm p-4 mb-4">
             <div className="flex items-center justify-between mb-4">
                 <div className="font-semibold text-text-main text-sm">精力与心情趋势</div>
                 <div className="flex bg-gray-100 rounded-lg p-0.5">
@@ -127,7 +127,7 @@ export function TrendChartCard({ history }: AnalyticsProps) {
             </div>
 
             {/* Chart */}
-            <div className="relative w-full aspect-[2/1] bg-gradient-to-b from-white to-pink-soft/20 rounded-xl mb-3">
+            <div className="relative w-full aspect-[2/1] bg-gradient-to-b from-white to-bg-soft/20 rounded-xl mb-3">
                 <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full overflow-visible">
                     {/* Grid lines (0, 5, 10) */}
                     {[0, 5, 10].map(val => (
@@ -212,8 +212,8 @@ export function TagStatsCard({ history }: AnalyticsProps) {
 
     if (!stats) {
         return (
-            <div className="bg-white rounded-2xl border border-pink-border shadow-sm p-4 mb-4 text-center py-6">
-                <div className="w-10 h-10 bg-pink-soft rounded-full flex items-center justify-center mx-auto mb-2 text-xl">🌱</div>
+            <div className="bg-white rounded-2xl border border-border-soft shadow-sm p-4 mb-4 text-center py-6">
+                <div className="w-10 h-10 bg-bg-soft rounded-full flex items-center justify-center mx-auto mb-2 text-xl">🌱</div>
                 <div className="text-xs text-text-subtle">最近还没有足够的记录，先多和自己的脸见几次面吧。</div>
             </div>
         );
@@ -235,13 +235,13 @@ export function TagStatsCard({ history }: AnalyticsProps) {
     }
 
     return (
-        <div className="bg-white rounded-2xl border border-pink-border shadow-sm p-4 mb-4">
+        <div className="bg-white rounded-2xl border border-border-soft shadow-sm p-4 mb-4">
             <h3 className="text-sm font-semibold text-text-main mb-1">最近常见的情绪标签</h3>
             <p className="text-[10px] text-text-subtle mb-4">统计范围：最近 30 天的记录</p>
 
             <div className="flex flex-wrap gap-2 mb-4">
                 {sortedTags.map(({ tag, count, percentage }) => (
-                    <div key={tag} className="flex items-center gap-2 bg-pink-soft/50 px-3 py-1.5 rounded-full border border-pink-border/50">
+                    <div key={tag} className="flex items-center gap-2 bg-bg-soft/50 px-3 py-1.5 rounded-full border border-border-soft/50">
                         <span className="text-sm font-medium text-text-main">#{tag}</span>
                         <span className="text-[10px] text-text-subtle opacity-80">{count}次 ({percentage}%)</span>
                     </div>

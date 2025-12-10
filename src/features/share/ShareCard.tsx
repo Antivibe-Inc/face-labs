@@ -21,11 +21,11 @@ export function ShareCard({ record, id }: ShareCardProps) {
     return (
         <div
             id={id}
-            className="w-[360px] bg-gradient-to-br from-[#FFF0F5] to-white p-6 rounded-[32px] shadow-sm border border-pink-100 flex flex-col relative overflow-hidden font-sans text-text-main"
+            className="w-[360px] bg-gradient-to-br from-[#F5F7F2] to-white p-6 rounded-[32px] shadow-sm border border-border-soft flex flex-col relative overflow-hidden font-sans text-text-main"
             style={{ aspectRatio: '4/5' }}
         >
             {/* Decorative Background Elements */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-pink-200/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-accent/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-40 h-40 bg-purple-100/30 rounded-full blur-3xl translate-y-1/2 -translate-x-1/3 pointer-events-none" />
 
             {/* Header: Date */}
@@ -62,7 +62,7 @@ export function ShareCard({ record, id }: ShareCardProps) {
                             />
                         </div>
                     </div>
-                    <div className="w-px h-6 bg-pink-border/50" />
+                    <div className="w-px h-6 bg-border-soft/50" />
                     <div className="flex flex-col items-center gap-1">
                         <span>心情 {mood_brightness}</span>
                         <div className="w-16 h-1.5 bg-gray-100 rounded-full overflow-hidden">
@@ -77,7 +77,7 @@ export function ShareCard({ record, id }: ShareCardProps) {
                 {/* Tags */}
                 <div className="flex flex-wrap justify-center gap-2 mb-4">
                     {tags.slice(0, 3).map(tag => (
-                        <span key={tag} className="px-2.5 py-0.5 bg-white/70 border border-pink-100 text-text-subtle text-[10px] rounded-full shadow-sm">
+                        <span key={tag} className="px-2.5 py-0.5 bg-white/70 border border-border-soft text-text-subtle text-[10px] rounded-full shadow-sm">
                             #{tag}
                         </span>
                     ))}

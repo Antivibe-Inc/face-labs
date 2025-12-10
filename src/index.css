@@ -4,6 +4,6 @@
 
 @layer base {
   body {
-    @apply antialiased text-text-main bg-pink-soft;
+    @apply antialiased text-text-main bg-bg-soft;
   }
 }

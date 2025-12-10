@@ -46,7 +46,7 @@ export function InsightsView({ onNavigateToTimeline }: InsightsViewProps) {
             {history.length > 0 && (
                 <div
                     onClick={onNavigateToTimeline}
-                    className="bg-gradient-to-r from-pink-soft to-white border border-pink-border rounded-2xl p-4 flex items-center justify-between cursor-pointer active:scale-[0.98] transition-transform shadow-sm"
+                    className="bg-gradient-to-r from-bg-soft to-white border border-border-soft rounded-2xl p-4 flex items-center justify-between cursor-pointer active:scale-[0.98] transition-transform shadow-sm"
                 >
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-xl shadow-sm">

@@ -7,17 +7,17 @@ export default {
     theme: {
         extend: {
             colors: {
-                primary: '#F973B7',
-                'pink-soft': '#FFF7FB',
-                'pink-panel': '#FDECF4',
-                'pink-border': '#F5D0E6',
-                accent: '#F9A8D4',
-                'text-main': '#2E1A2E',
-                'text-subtle': '#8C728E',
+                primary: '#7CA592', // Sage Green
+                'bg-soft': '#F5F7F2', // Warm Sage Tint
+                'bg-panel': '#E6EBE6', // Light Sage Panel
+                'border-soft': '#D1DAD5', // Muted Sage Border
+                accent: '#A3B18A', // Olive Green Accent
+                'text-main': '#2C3E33', // Deep Green Black
+                'text-subtle': '#6B7F74', // Muted Green Grey
                 'card-bg': '#FFFFFF',
             },
             boxShadow: {
-                'soft': '0 4px 20px -2px rgba(249, 168, 212, 0.25)',
+                'soft': '0 4px 20px -2px rgba(124, 165, 146, 0.25)',
             },
             fontFamily: {
                 sans: ['Inter', 'system-ui', 'sans-serif'],

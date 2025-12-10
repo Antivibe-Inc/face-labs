@@ -181,7 +181,7 @@ export function SettingsTesting() {
     };
 
     return (
-        <div className="bg-white rounded-3xl border border-pink-border shadow-sm p-5 mt-6 border-l-4 border-l-yellow-400">
+        <div className="bg-white rounded-3xl border border-border-soft shadow-sm p-5 mt-6 border-l-4 border-l-yellow-400">
             <h3 className="text-base font-bold text-text-main mb-1">测试数据工具（仅开发自测用）</h3>
             <p className="text-xs text-text-subtle mb-6">这里会直接写入或清空本机的历史记录数据，请谨慎使用。</p>
 

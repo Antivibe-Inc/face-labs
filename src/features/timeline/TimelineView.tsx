@@ -36,19 +36,17 @@ interface EntryCardProps {
 
 function EntryCard({ onTakePhoto, isAnalyzing, isActive }: EntryCardProps) {
     return (
-        <div className={`w-[85vw] max-w-sm h-[70vh] flex-shrink-0 snap-center flex flex-col items-center justify-center p-6 bg-white rounded-[40px] shadow-soft relative overflow-hidden transition-all duration-300 ${isActive ? 'scale-100 border-[3px] border-primary shadow-xl' : 'scale-[0.92] border border-pink-border/50 opacity-80'}`}>
+        <div className={`w-[85vw] max-w-sm h-[70vh] flex-shrink-0 snap-center flex flex-col items-center justify-center p-6 bg-white rounded-[40px] shadow-soft relative overflow-hidden transition-all duration-300 ${isActive ? 'scale-100 border-[3px] border-primary shadow-xl' : 'scale-[0.92] border border-border-soft/50 opacity-80'}`}>
             {/* Decorative Background */}
-            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white via-white to-pink-50 -z-10" />
+            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white via-white to-bg-soft -z-10" />
 
-            <div className="w-24 h-24 mb-6 animate-pulse-slow">
-                <img
-                    src="/assets/camera_icon_custom.png"
-                    alt="Camera"
-                    className="w-full h-full object-cover rounded-3xl shadow-soft"
-                />
+            <div className="w-24 h-24 mb-6 rounded-[32px] bg-white shadow-soft flex items-center justify-center text-primary animate-pulse-slow">
+                <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
             </div>
 
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-[#FB6F92] to-primary bg-clip-text text-transparent mb-3 text-center">
+            <h2 className="text-2xl font-bold text-primary mb-3 text-center">
                 观察今天的自己
             </h2>
             <p className="text-sm text-text-subtle text-center leading-relaxed mb-10 max-w-xs">
@@ -60,7 +58,7 @@ function EntryCard({ onTakePhoto, isAnalyzing, isActive }: EntryCardProps) {
                 <button
                     onClick={onTakePhoto}
                     disabled={isAnalyzing}
-                    className="w-full py-4 bg-primary text-white rounded-full text-base font-semibold shadow-lg shadow-pink-200 active:scale-95 transition-all hover:opacity-90 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full py-4 bg-primary text-white rounded-full text-base font-semibold shadow-lg shadow-soft active:scale-95 transition-all hover:opacity-90 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                     {isAnalyzing ? (
                         <>
@@ -102,11 +100,20 @@ function FaceCard({ record, onDelete, onClick, isActive }: FaceCardProps) {
     return (
         <div
             onClick={onClick}
-            className={`w-[85vw] max-w-sm h-[70vh] flex-shrink-0 snap-center bg-white rounded-[40px] shadow-sm relative overflow-hidden flex flex-col cursor-pointer active:scale-[0.98] transition-all duration-300 ${isActive ? 'scale-100 border-[3px] border-primary shadow-xl' : 'scale-[0.92] border border-pink-border/50 opacity-80'}`}
+            className={`w-[85vw] max-w-sm h-[70vh] flex-shrink-0 snap-center bg-white rounded-[40px] shadow-sm relative overflow-hidden flex flex-col cursor-pointer active:scale-[0.98] transition-all duration-300 ${isActive ? 'scale-100 border-[3px] border-primary shadow-xl' : 'scale-[0.92] border border-border-soft/50 opacity-80'}`}
         >
             {/* Header Image Area */}
-            <div className="relative h-[55%] bg-gray-100">
-                <img src={record.thumbnail} alt="Face" className="w-full h-full object-cover" />
+            <div className="relative h-[55%] bg-gray-100 flex items-center justify-center overflow-hidden">
+                {record.thumbnail.includes('camera_icon_custom') ? (
+                    <div className="w-full h-full bg-white flex items-center justify-center text-primary/50">
+                        <svg className="w-20 h-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                ) : (
+                    <img src={record.thumbnail} alt="Face" className="w-full h-full object-cover" />
+                )}
+
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-6">
                     <div className="text-white text-xs opacity-80 mb-1">{record.dateLabel.split(' ')[0]}</div>
                     <div className="text-white text-lg font-bold truncate pr-8">{record.emotion.summary}</div>
@@ -141,7 +148,7 @@ function FaceCard({ record, onDelete, onClick, isActive }: FaceCardProps) {
                     {/* Tags */}
                     <div className="flex flex-wrap gap-2 mb-4">
                         {topTags.map(tag => (
-                            <span key={tag} className="px-3 py-1 bg-pink-soft/50 text-text-main text-xs rounded-full border border-pink-border/30">
+                            <span key={tag} className="px-3 py-1 bg-bg-soft/50 text-text-main text-xs rounded-full border border-border-soft/30">
                                 #{tag}
                             </span>
                         ))}
@@ -159,7 +166,7 @@ function FaceCard({ record, onDelete, onClick, isActive }: FaceCardProps) {
                     )}
                 </div>
 
-                <button className="w-full py-3 mt-2 text-sm text-primary font-medium hover:bg-pink-soft/30 rounded-xl transition-colors flex items-center justify-center gap-1">
+                <button className="w-full py-3 mt-2 text-sm text-primary font-medium hover:bg-bg-soft/30 rounded-xl transition-colors flex items-center justify-center gap-1">
                     查看完整报告
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -399,7 +406,7 @@ export function TimelineView() {
             {showDailyLimitAlert && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-black/40 backdrop-blur-sm animate-fade-in">
                     <div className="bg-white rounded-[32px] p-6 w-full max-w-xs text-center shadow-2xl scale-100 animate-in fade-in zoom-in-95 duration-200">
-                        <div className="w-16 h-16 bg-pink-50 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+                        <div className="w-16 h-16 bg-bg-soft rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
                             ✋
                         </div>
                         <h3 className="text-xl font-bold text-text-main mb-2">今天已经有一张脸卡啦</h3>
@@ -410,7 +417,7 @@ export function TimelineView() {
                         </p>
                         <button
                             onClick={() => setShowDailyLimitAlert(false)}
-                            className="w-full py-3.5 bg-primary text-white rounded-2xl font-semibold shadow-lg shadow-pink-200 active:scale-95 transition-all"
+                            className="w-full py-3.5 bg-primary text-white rounded-2xl font-semibold shadow-lg shadow-soft active:scale-95 transition-all"
                         >
                             知道了
                         </button>
@@ -421,9 +428,9 @@ export function TimelineView() {
             {/* Daily Reminder Overlay */}
             {showReminder && (
                 <div className="fixed inset-0 z-[50] flex items-end justify-center p-4 bg-black/20 backdrop-blur-[2px] animate-fade-in pointer-events-none">
-                    <div className="bg-white/95 backdrop-blur rounded-[24px] p-4 w-full max-w-sm shadow-xl border border-pink-border/50 pointer-events-auto animate-in slide-in-from-bottom-10 duration-300 mb-20">
+                    <div className="bg-white/95 backdrop-blur rounded-[24px] p-4 w-full max-w-sm shadow-xl border border-border-soft/50 pointer-events-auto animate-in slide-in-from-bottom-10 duration-300 mb-20">
                         <div className="flex items-start gap-4">
-                            <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center shrink-0 text-xl">
+                            <div className="w-10 h-10 rounded-full bg-border-soft flex items-center justify-center shrink-0 text-xl">
                                 ⏰
                             </div>
                             <div className="flex-1">

@@ -32,7 +32,7 @@ export function InitialView({ onImageSelect, showReminder, onDismissReminder }: 
             )}
 
             {showReminder && (
-                <div className="mx-4 mt-2 mb-6 bg-pink-panel/50 border border-pink-border rounded-2xl p-4 flex items-start gap-3 animate-fade-in relative z-10">
+                <div className="mx-4 mt-2 mb-6 bg-bg-panel/50 border border-border-soft rounded-2xl p-4 flex items-start gap-3 animate-fade-in relative z-10">
                     <div className="text-xl mt-0.5">⏰</div>
                     <div className="flex-1 text-left">
                         <h3 className="text-sm font-bold text-text-main mb-1">今天，想要和自己的脸打个招呼吗？</h3>
@@ -42,7 +42,7 @@ export function InitialView({ onImageSelect, showReminder, onDismissReminder }: 
                         <div className="flex items-center gap-4">
                             <button
                                 onClick={() => setShowCamera(true)}
-                                className="text-xs font-semibold text-primary bg-white/80 px-3 py-1.5 rounded-full border border-pink-border/50 shadow-sm active:scale-95 transition-transform"
+                                className="text-xs font-semibold text-primary bg-white/80 px-3 py-1.5 rounded-full border border-border-soft/50 shadow-sm active:scale-95 transition-transform"
                             >
                                 现在去拍一张
                             </button>
@@ -58,7 +58,7 @@ export function InitialView({ onImageSelect, showReminder, onDismissReminder }: 
             )}
 
             <div className={`flex flex-col items-center justify-start min-h-[60vh] px-6 text-center animate-fade-in ${showReminder ? 'pt-4' : 'pt-12'}`}>
-                <div className="w-24 h-24 mb-6 rounded-full bg-pink-soft flex items-center justify-center border-2 border-dashed border-pink-border text-accent">
+                <div className="w-24 h-24 mb-6 rounded-[32px] bg-white shadow-soft flex items-center justify-center text-primary">
                     <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -76,7 +76,7 @@ export function InitialView({ onImageSelect, showReminder, onDismissReminder }: 
                     {/* Take Photo Button */}
                     <button
                         onClick={() => setShowCamera(true)}
-                        className="w-full py-4 bg-gradient-to-r from-[#FB6F92] to-primary text-white rounded-full font-semibold shadow-soft active:scale-95 transition-transform flex items-center justify-center gap-2"
+                        className="w-full py-4 bg-primary text-white rounded-full font-semibold shadow-soft active:scale-95 transition-transform flex items-center justify-center gap-2"
                     >
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
@@ -89,7 +89,7 @@ export function InitialView({ onImageSelect, showReminder, onDismissReminder }: 
                     {/* Upload Photo Button */}
                     <button
                         onClick={() => uploadInputRef.current?.click()}
-                        className="w-full py-3.5 bg-white text-primary border border-primary rounded-full font-semibold shadow-sm active:scale-95 transition-transform hover:bg-pink-panel flex items-center justify-center gap-2"
+                        className="w-full py-3.5 bg-white text-primary border border-primary rounded-full font-semibold shadow-sm active:scale-95 transition-transform hover:bg-bg-panel flex items-center justify-center gap-2"
                     >
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />

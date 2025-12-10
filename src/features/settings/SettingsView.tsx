@@ -43,7 +43,7 @@ export function SettingsView() {
             </div>
 
             {/* Reminder Card */}
-            <div className="bg-white rounded-3xl border border-pink-border shadow-sm p-5 space-y-6">
+            <div className="bg-white rounded-3xl border border-border-soft shadow-sm p-5 space-y-6">
                 <div className="flex justify-between items-center mb-6">
                     <div className="flex flex-col">
                         <span className="text-lg font-bold text-text-main">每日提醒</span>
@@ -64,7 +64,7 @@ export function SettingsView() {
                             <select
                                 value={reminderTime.hour}
                                 onChange={(e) => setReminderTime({ ...reminderTime, hour: parseInt(e.target.value) })}
-                                className="flex-1 p-3 bg-pink-soft/50 border border-pink-border rounded-xl text-text-main focus:outline-none focus:border-primary text-center font-bold text-lg"
+                                className="flex-1 p-3 bg-bg-soft/50 border border-border-soft rounded-xl text-text-main focus:outline-none focus:border-primary text-center font-bold text-lg"
                             >
                                 {Array.from({ length: 24 }).map((_, i) => (
                                     <option key={i} value={i}>{i.toString().padStart(2, '0')}</option>
@@ -74,7 +74,7 @@ export function SettingsView() {
                             <select
                                 value={reminderTime.minute}
                                 onChange={(e) => setReminderTime({ ...reminderTime, minute: parseInt(e.target.value) })}
-                                className="flex-1 p-3 bg-pink-soft/50 border border-pink-border rounded-xl text-text-main focus:outline-none focus:border-primary text-center font-bold text-lg"
+                                className="flex-1 p-3 bg-bg-soft/50 border border-border-soft rounded-xl text-text-main focus:outline-none focus:border-primary text-center font-bold text-lg"
                             >
                                 {Array.from({ length: 60 }).map((_, i) => (
                                     <option key={i} value={i}>{i.toString().padStart(2, '0')}</option>
@@ -91,7 +91,7 @@ export function SettingsView() {
             </div>
 
             {/* Privacy Note */}
-            <div className="bg-pink-soft/50 rounded-2xl p-4 text-center">
+            <div className="bg-bg-soft/50 rounded-2xl p-4 text-center">
                 <p className="text-[10px] text-text-subtle leading-normal">
                     所有设置和历史记录都只保存在本机浏览器中，不会上传到服务器。
                 </p>
