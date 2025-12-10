@@ -1,11 +1,12 @@
 
 import { useState, useRef, useEffect } from 'react';
 import type { FaceHistoryRecord } from '../../services/historyStore';
-import { loadHistory, deleteRecord, updateRecordNote, saveRecord } from '../../services/historyStore';
+import { loadHistory, deleteRecord, updateRecordNote, saveRecord, hasTodayRecord } from '../../services/historyStore';
 import { CameraModal } from '../today/CameraModal';
 import { analyzeFaceMock as analyzeFace } from '../../services/mockFaceAnalysis';
 import type { FaceAnalysisResult } from '../../types/analysis';
 import { HistoryDetailOverlay } from '../history/HistoryView';
+import { loadSettings } from '../../services/settingsStore';
 
 // --- Helper: Create Record ---
 function createRecordFromAnalysis(analysis: FaceAnalysisResult, imageUrl: string): FaceHistoryRecord {
@@ -178,6 +179,8 @@ export function TimelineView() {
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [selectedRecord, setSelectedRecord] = useState<FaceHistoryRecord | null>(null);
     const [activeIndex, setActiveIndex] = useState(0);
+    const [showDailyLimitAlert, setShowDailyLimitAlert] = useState(false); // Alert state
+    const [showReminder, setShowReminder] = useState(false); // Reminder state
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -214,6 +217,38 @@ export function TimelineView() {
     useEffect(() => {
         setHistory(loadHistory());
     }, []);
+
+    // Check for reminder on mount
+    useEffect(() => {
+        const settings = loadSettings();
+        if (!settings.reminderEnabled) return;
+
+        // 1. Check if dismissed for today
+        const todayStr = new Date().toDateString();
+        const dismissedDate = localStorage.getItem('faceLabs_dismissedReminderDate');
+        if (dismissedDate === todayStr) return;
+
+        // 2. Check if already has record for today
+        // Note: loadHistory() might not be updated in state yet, so load directly
+        const currentHistory = loadHistory();
+        const hasTodayRecord = currentHistory.some(r => new Date(r.date).toDateString() === todayStr);
+        if (hasTodayRecord) return;
+
+        // 3. Time check: Show if it's past the reminder time
+        const now = new Date();
+        const reminderTime = settings.reminderHour * 60 + settings.reminderMinute;
+        const currentTime = now.getHours() * 60 + now.getMinutes();
+
+        if (currentTime >= reminderTime) {
+            setShowReminder(true);
+        }
+    }, []);
+
+    const handleDismissReminder = () => {
+        setShowReminder(false);
+        const todayStr = new Date().toDateString();
+        localStorage.setItem('faceLabs_dismissedReminderDate', todayStr);
+    };
 
     const scrollToNewest = () => {
         if (scrollContainerRef.current) {
@@ -252,10 +287,18 @@ export function TimelineView() {
             await new Promise(resolve => setTimeout(resolve, 800)); // Minimal delay for UX
             const analysis = await analyzeFace(imageUrl);
             const newRecord = createRecordFromAnalysis(analysis, imageUrl);
-            saveRecord(newRecord);
+
+            const success = saveRecord(newRecord);
+
+            if (!success) {
+                // If blocked by daily limit (though UI should have prevented this)
+                setShowDailyLimitAlert(true);
+                return;
+            }
 
             // Refresh and View
             setHistory(loadHistory()); // This puts new record at top (index 0 of history array -> index 1 of View)
+            setSelectedRecord(newRecord); // Auto-open report view
             scrollToNewest();
         } catch (error) {
             console.error("Analysis failed", error);
@@ -284,7 +327,7 @@ export function TimelineView() {
             <div className="pt-4 pb-2 px-6 flex flex-col items-center text-center">
                 <h1 className="text-xl font-bold text-text-main">脸卡时间线</h1>
                 <p className="text-xs text-text-subtle mt-0.5 flex items-center gap-2">
-                    <span>记录每一个当下的自己</span>
+                    <span>记录每天的自己</span>
                     <span className="w-1 h-1 rounded-full bg-gray-300"></span>
                     <span>{history.length} 张卡片</span>
                 </p>
@@ -302,7 +345,13 @@ export function TimelineView() {
                     className="snap-center"
                 >
                     <EntryCard
-                        onTakePhoto={() => setIsCameraOpen(true)}
+                        onTakePhoto={() => {
+                            if (hasTodayRecord()) {
+                                setShowDailyLimitAlert(true);
+                            } else {
+                                setIsCameraOpen(true);
+                            }
+                        }}
                         isAnalyzing={isAnalyzing}
                         isActive={activeIndex === 0}
                     />
@@ -344,6 +393,66 @@ export function TimelineView() {
                     onPhotoTaken={(file) => handleCameraCapture(file)}
                     onCancel={() => setIsCameraOpen(false)}
                 />
+            )}
+
+            {/* Daily Limit Alert Overlay */}
+            {showDailyLimitAlert && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-black/40 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-white rounded-[32px] p-6 w-full max-w-xs text-center shadow-2xl scale-100 animate-in fade-in zoom-in-95 duration-200">
+                        <div className="w-16 h-16 bg-pink-50 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+                            ✋
+                        </div>
+                        <h3 className="text-xl font-bold text-text-main mb-2">今天已经有一张脸卡啦</h3>
+                        <p className="text-sm text-text-subtle leading-relaxed mb-6">
+                            Face Labs 每天只保留一条记录。
+                            <br />
+                            如果你想重新来一次，可以先在时间线里删除今天的脸卡，再重新拍一张。
+                        </p>
+                        <button
+                            onClick={() => setShowDailyLimitAlert(false)}
+                            className="w-full py-3.5 bg-primary text-white rounded-2xl font-semibold shadow-lg shadow-pink-200 active:scale-95 transition-all"
+                        >
+                            知道了
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Daily Reminder Overlay */}
+            {showReminder && (
+                <div className="fixed inset-0 z-[50] flex items-end justify-center p-4 bg-black/20 backdrop-blur-[2px] animate-fade-in pointer-events-none">
+                    <div className="bg-white/95 backdrop-blur rounded-[24px] p-4 w-full max-w-sm shadow-xl border border-pink-border/50 pointer-events-auto animate-in slide-in-from-bottom-10 duration-300 mb-20">
+                        <div className="flex items-start gap-4">
+                            <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center shrink-0 text-xl">
+                                ⏰
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="text-sm font-bold text-text-main mb-1">该和今天的脸打个招呼了</h3>
+                                <p className="text-xs text-text-subtle leading-relaxed mb-3">
+                                    现在是观察自己的好时间。
+                                </p>
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => {
+                                            setShowReminder(false);
+                                            // Optional: scroll to entry card if needed, but we are likely already there or user will scroll.
+                                            cardRefs.current[0]?.scrollIntoView({ behavior: 'smooth' });
+                                        }}
+                                        className="text-xs font-semibold bg-primary text-white px-4 py-2 rounded-full shadow-sm active:scale-95 transition-transform"
+                                    >
+                                        去拍一张
+                                    </button>
+                                    <button
+                                        onClick={handleDismissReminder}
+                                        className="text-xs text-text-subtle px-2 py-2 hover:text-text-main transition-colors"
+                                    >
+                                        今天先不用
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             )}
 
             {selectedRecord && (

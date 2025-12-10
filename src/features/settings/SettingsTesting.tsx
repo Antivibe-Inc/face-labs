@@ -128,7 +128,7 @@ export function SettingsTesting() {
                 d.setHours(getRandomInt(8, 22), getRandomInt(0, 59), 0, 0);
 
                 const record = generateMockRecord(d);
-                saveRecord(record);
+                saveRecord(record, { ignoreDailyLimit: true });
             }
         }
         showMsg(`已生成 ${days} 天的测试数据。`);
@@ -170,7 +170,7 @@ export function SettingsTesting() {
                 note: customNote
             };
 
-            saveRecord(record);
+            saveRecord(record, { ignoreDailyLimit: true });
             showMsg("已创建一条测试记录。");
 
             // Reset msg after 3s

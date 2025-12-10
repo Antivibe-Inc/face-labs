@@ -4,6 +4,7 @@ import type { FaceHistoryRecord } from '../../services/historyStore';
 import { loadHistory, clearHistory, deleteRecord, updateRecordNote } from '../../services/historyStore';
 import { getWeeklyStats, buildWeeklySummary, type WeeklyStats } from './historyStats';
 import { TrendChartCard, TagStatsCard } from './HistoryAnalytics';
+import { pickQuestionsForRecord, pickPracticesForRecord } from '../../services/suggestionService';
 
 interface HistoryViewProps {
     onNavigateToToday: () => void;
@@ -343,6 +344,10 @@ export function HistoryDetailOverlay({ record, onClose, onSaveNote }: HistoryDet
         setTimeout(() => setSaved(false), 2000);
     };
 
+    // Memoize dynamic content so it doesn't change while typing (re-rendering)
+    const questions = useMemo(() => pickQuestionsForRecord({ emotion: record.emotion }), [record.id]);
+    const practices = useMemo(() => pickPracticesForRecord({ emotion: record.emotion }), [record.id]);
+
     return (
         <div className="fixed inset-0 z-50 bg-gray-50/95 backdrop-blur-sm overflow-y-auto animate-fade-in flex flex-col">
             {/* Header */}
@@ -424,7 +429,7 @@ export function HistoryDetailOverlay({ record, onClose, onSaveNote }: HistoryDet
                         {record.reflection.summary}
                     </p>
                     <ul className="space-y-2">
-                        {record.reflection.questions.map((q, idx) => (
+                        {questions.map((q, idx) => (
                             <li key={idx} className="bg-pink-panel p-3 rounded-2xl text-sm text-text-main border border-pink-border">
                                 {q}
                             </li>
@@ -432,9 +437,25 @@ export function HistoryDetailOverlay({ record, onClose, onSaveNote }: HistoryDet
                     </ul>
                 </section>
 
+                {/* 3.5 Micro-Practices (New) */}
+                <section className="bg-white p-5 rounded-2xl shadow-soft border border-pink-border">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-primary mb-3">04 今天的小练习</h3>
+                    <p className="text-xs text-text-subtle mb-4">
+                        这是针对当时状态的小建议：
+                    </p>
+                    <div className="space-y-3">
+                        {practices.map((practice, idx) => (
+                            <div key={idx} className="flex items-start gap-3 bg-pink-soft/30 p-3 rounded-2xl border border-pink-border/50">
+                                <span className="text-lg">🌱</span>
+                                <span className="text-sm text-text-main leading-relaxed">{practice}</span>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
                 {/* 4. Note (Editable) */}
                 <section className="bg-white p-5 rounded-2xl shadow-soft border border-pink-border">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-primary mb-3">04 那天写下的一句话</h3>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-primary mb-3">05 今天写下的一句话</h3>
                     <textarea
                         className="w-full text-sm text-text-main p-3 rounded-2xl border border-pink-border bg-white focus:outline-none focus:ring-1 focus:ring-primary/50 resize-none min-h-[80px]"
                         rows={3}
@@ -447,6 +468,19 @@ export function HistoryDetailOverlay({ record, onClose, onSaveNote }: HistoryDet
                         <p className="text-[10px] text-text-subtle text-right mt-2 animate-fade-in">已保存。</p>
                     )}
                 </section>
+
+                {/* Finish Button */}
+                <div className="pt-4 pb-8">
+                    <button
+                        onClick={onClose}
+                        className="w-full py-4 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-pink-200 active:scale-95 transition-all flex items-center justify-center gap-2"
+                    >
+                        <span>返回时间线</span>
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
     );

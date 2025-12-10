@@ -39,8 +39,31 @@ export function loadHistory(): FaceHistoryRecord[] {
     }
 }
 
-export function saveRecord(record: FaceHistoryRecord): void {
+// Helper: Check if two dates are the same day (ignoring time)
+export function isSameDay(d1: Date, d2: Date): boolean {
+    return d1.getFullYear() === d2.getFullYear() &&
+        d1.getMonth() === d2.getMonth() &&
+        d1.getDate() === d2.getDate();
+}
+
+export function hasTodayRecord(): boolean {
     const history = loadHistory();
+    const now = new Date();
+    return history.some(r => isSameDay(new Date(r.date), now));
+}
+
+export function saveRecord(record: FaceHistoryRecord, options?: { ignoreDailyLimit?: boolean }): boolean {
+    const history = loadHistory();
+
+    // Daily Limit Check
+    if (!options?.ignoreDailyLimit) {
+        const recordDate = new Date(record.date);
+        const hasTodayRecord = history.some(r => isSameDay(new Date(r.date), recordDate));
+
+        if (hasTodayRecord) {
+            return false; // Block creation
+        }
+    }
 
     // New logic: Always append, never replace.
     // Add new record to the list
@@ -51,8 +74,10 @@ export function saveRecord(record: FaceHistoryRecord): void {
 
     try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+        return true;
     } catch (e) {
         console.error('Failed to save history:', e);
+        return false;
     }
 }
 

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { FaceAnalysisResult } from '../../types/analysis';
+import { pickQuestionsForRecord, pickPracticesForRecord } from '../../services/suggestionService';
 
 
 interface ReportViewProps {
@@ -107,12 +108,28 @@ export function ReportView({ result, image, onRetake, onSaveNote }: ReportViewPr
 
                 <h4 className="text-sm font-semibold text-text-main mb-3">给今天的你，一点点温柔的提问:</h4>
                 <ul className="space-y-3">
-                    {result.reflection.questions.map((q, idx) => (
+                    {pickQuestionsForRecord({ emotion: result.emotion }).map((q, idx) => (
                         <li key={idx} className="bg-pink-panel p-3 rounded-2xl text-sm text-text-main border border-pink-border">
                             {q}
                         </li>
                     ))}
                 </ul>
+            </section>
+
+            {/* Micro-Practices Section (New) */}
+            <section className="bg-card-bg p-5 rounded-2xl shadow-soft border border-pink-border">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-primary mb-3">今天的小练习</h3>
+                <p className="text-xs text-text-subtle mb-4">
+                    从下面挑一件最轻松的，如果今天只做到这一件，也已经很不错了。
+                </p>
+                <div className="space-y-3">
+                    {pickPracticesForRecord({ emotion: result.emotion }).map((practice, idx) => (
+                        <div key={idx} className="flex items-start gap-3 bg-white p-3 rounded-2xl border border-pink-border/50">
+                            <span className="text-lg">🌱</span>
+                            <span className="text-sm text-text-main leading-relaxed">{practice}</span>
+                        </div>
+                    ))}
+                </div>
             </section>
 
             {/* 4. Personal Note */}

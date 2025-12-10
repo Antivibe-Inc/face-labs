@@ -33,8 +33,8 @@ export function SettingsView() {
         <div className="p-4 pb-24 space-y-6">
             {/* Header */}
             <div className="flex flex-col items-center text-center">
-                <h2 className="text-2xl font-bold text-text-main">设置</h2>
-                <p className="text-sm text-text-subtle mt-0.5">在这里设置你的使用习惯</p>
+                <h2 className="text-xl font-bold text-text-main">设置</h2>
+                <p className="text-xs text-text-subtle mt-0.5">在这里设置你的使用习惯</p>
             </div>
 
             {/* Reminder Card */}

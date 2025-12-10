@@ -32,14 +32,12 @@ export function TodayContainer() {
         const hasTodayRecord = history.some(r => new Date(r.date).toDateString() === todayStr);
         if (hasTodayRecord) return;
 
-        // 3. Time window check (within 60 mins)
+        // 3. Time check: Show if it's past the reminder time
         const now = new Date();
         const reminderTime = settings.reminderHour * 60 + settings.reminderMinute;
         const currentTime = now.getHours() * 60 + now.getMinutes();
 
-        // Handle midnight wrap-around roughly or just simple diff
-        const diff = Math.abs(currentTime - reminderTime);
-        if (diff <= 60) {
+        if (currentTime >= reminderTime) {
             setShowReminder(true);
         }
     }, []);
