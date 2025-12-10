@@ -1,0 +1,31 @@
+{
+    "emotion": {
+        "summary": "Calm and composed, slightly tired.",
+        "energy_level": 4,
+        "mood_brightness": 5,
+        "tags": [
+            "calm",
+            "steady",
+            "tired"
+        ],
+        "today_suggestion": "Today seems suitable for routine tasks and preserving your energy."
+    },
+    "lifestyle": {
+        "signals": [
+            "Subtle shadows under eyes might suggest need for more rest.",
+            "Even complexion suggests generally good baseline health."
+        ],
+        "suggestions": [
+            "Consider an earlier bedtime tonight.",
+            "Hydrate well throughout the afternoon."
+        ],
+        "disclaimer": "These are lifestyle hints based on appearance, not medical advice or diagnosis."
+    },
+    "reflection": {
+        "summary": "You appear to be managing your responsibilities with a steady hand, despite perhaps feeling low on energy.",
+        "questions": [
+            "What is one thing you can delegate or delay today?",
+            "How can you be gentler with yourself this evening?"
+        ]
+    }
+}
