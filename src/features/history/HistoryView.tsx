@@ -1,5 +1,5 @@
 
-import { useEffect, useState, useMemo, useRef } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import type { FaceHistoryRecord } from '../../services/historyStore';
 import { loadHistory, clearHistory, deleteRecord, updateRecordNote } from '../../services/historyStore';
 import { getWeeklyStats, buildWeeklySummary, type WeeklyStats } from './historyStats';
