@@ -178,7 +178,6 @@ export function pickQuestionsForRecord(record: RecordLike): string[] {
     // 如果只有 2 条，全拿
     // 如果 > 4 条，随机选 4 条
     // 为了保证多样性，打乱后取
-    const targetCount = Math.min(Math.max(2, Math.floor(Math.random() * 3) + 2), 4); // Random between 2 and 4, capped at 4? logic check.
     // simpler: random number between 2 and 4 inclusive.
     const count = Math.floor(Math.random() * (4 - 2 + 1)) + 2;
 

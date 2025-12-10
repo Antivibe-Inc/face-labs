@@ -6,7 +6,7 @@ interface ShareCardProps {
 }
 
 export function ShareCard({ record, id }: ShareCardProps) {
-    const { dateLabel, thumbnail, emotion, note } = record;
+    const { thumbnail, emotion, note } = record;
     const { summary, energy_level, mood_brightness, tags } = emotion;
 
     // Parse date for display (e.g., "2025年 12月 10日")

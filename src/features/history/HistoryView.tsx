@@ -339,7 +339,6 @@ export function HistoryDetailOverlay({ record, onClose, onSaveNote }: HistoryDet
     const [note, setNote] = useState(record.note || '');
     const [saved, setSaved] = useState(false);
     const [showShare, setShowShare] = useState(false);
-    const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     const handleSave = () => {
         onSaveNote(note);

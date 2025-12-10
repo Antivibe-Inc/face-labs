@@ -3,7 +3,7 @@ import { analyzeFaceMock } from './mockFaceAnalysis';
 import { callGeminiAnalysis } from './geminiService';
 
 // Helper to generate rich text based on scores if Gemini doesn't provide it
-function generateRichContent(energy: number, mood: number, tags: string[]): {
+function generateRichContent(energy: number, mood: number): {
     summary: string;
     today_suggestion: string;
     questions: string[];
@@ -47,7 +47,7 @@ export async function analyzeFace(image: File | string): Promise<FaceAnalysisRes
 
         const { energy_level, mood_brightness, tags, skin_signals, lifestyle_hints, analysis_confidence, warnings } = geminiResult;
 
-        const richContent = generateRichContent(energy_level, mood_brightness, tags);
+        const richContent = generateRichContent(energy_level, mood_brightness);
 
         const emotion: EmotionData = {
             summary: richContent.summary,
