@@ -1,5 +1,6 @@
 
 export interface FaceLabsSettings {
+    theme: 'sage' | 'blue' | 'sand';
     reminderEnabled: boolean;
     reminderHour: number;   // 0–23
     reminderMinute: number; // 0–59
@@ -8,9 +9,10 @@ export interface FaceLabsSettings {
 const STORAGE_KEY = 'faceLabs_settings';
 
 const DEFAULT_SETTINGS: FaceLabsSettings = {
+    theme: 'sage',
     reminderEnabled: false,
-    reminderHour: 21,
-    reminderMinute: 30,
+    reminderHour: 20,
+    reminderMinute: 0,
 };
 
 export function loadSettings(): FaceLabsSettings {

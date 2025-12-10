@@ -7,17 +7,17 @@ export default {
     theme: {
         extend: {
             colors: {
-                primary: '#7CA592', // Sage Green
-                'bg-soft': '#F5F7F2', // Warm Sage Tint
-                'bg-panel': '#E6EBE6', // Light Sage Panel
-                'border-soft': '#D1DAD5', // Muted Sage Border
-                accent: '#A3B18A', // Olive Green Accent
-                'text-main': '#2C3E33', // Deep Green Black
-                'text-subtle': '#6B7F74', // Muted Green Grey
+                primary: 'rgb(var(--color-primary) / <alpha-value>)',
+                'bg-soft': 'rgb(var(--color-bg-soft) / <alpha-value>)',
+                'bg-panel': 'rgb(var(--color-bg-panel) / <alpha-value>)',
+                'border-soft': 'rgb(var(--color-border-soft) / <alpha-value>)',
+                accent: 'rgb(var(--color-accent) / <alpha-value>)',
+                'text-main': 'rgb(var(--color-text-main) / <alpha-value>)',
+                'text-subtle': 'rgb(var(--color-text-subtle) / <alpha-value>)',
                 'card-bg': '#FFFFFF',
             },
             boxShadow: {
-                'soft': '0 4px 20px -2px rgba(124, 165, 146, 0.25)',
+                'soft': '0 4px 20px -2px rgb(var(--color-primary) / 0.25)',
             },
             fontFamily: {
                 sans: ['Inter', 'system-ui', 'sans-serif'],

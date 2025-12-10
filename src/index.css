@@ -3,6 +3,62 @@
 @tailwind utilities;
 
 @layer base {
+
+  /* Default Theme: Sage Green */
+  :root {
+    /* RGB values for opacity modifier support */
+    --color-primary: 124 165 146;
+    /* #7CA592 */
+    --color-bg-soft: 245 247 242;
+    /* #F5F7F2 */
+    --color-bg-panel: 230 235 230;
+    /* #E6EBE6 */
+    --color-border-soft: 209 218 213;
+    /* #D1DAD5 */
+    --color-accent: 163 177 138;
+    /* #A3B18A */
+    --color-text-main: 44 62 51;
+    /* #2C3E33 */
+    --color-text-subtle: 107 127 116;
+    /* #6B7F74 */
+  }
+
+  /* Theme: Mineral Blue */
+  [data-theme='blue'] {
+    --color-primary: 107 138 158;
+    /* #6B8A9E - Steel Blue */
+    --color-bg-soft: 240 244 247;
+    /* #F0F4F7 - Alice Blue-ish */
+    --color-bg-panel: 225 232 237;
+    /* #E1E8ED - Light Gray Blue */
+    --color-border-soft: 197 211 220;
+    /* #C5D3DC - Muted Blue Grey */
+    --color-accent: 143 163 173;
+    /* #8FA3AD - Blue Grey Accent */
+    --color-text-main: 36 50 59;
+    /* #24323B - Deep Blue Black */
+    --color-text-subtle: 93 113 126;
+    /* #5D717E - Slate Grey */
+  }
+
+  /* Theme: Warm Sand */
+  [data-theme='sand'] {
+    --color-primary: 156 130 107;
+    /* #9C826B - Warm Brown */
+    --color-bg-soft: 250 247 242;
+    /* #FAF7F2 - Cream */
+    --color-bg-panel: 240 235 227;
+    /* #F0EBE3 - Oatmeal */
+    --color-border-soft: 224 216 204;
+    /* #E0D8CC - Sand Border */
+    --color-accent: 192 160 128;
+    /* #C0A080 - Tan Accent */
+    --color-text-main: 62 50 40;
+    /* #3E3228 - Deep Brown */
+    --color-text-subtle: 138 120 104;
+    /* #8A7868 - Muted Brown */
+  }
+
   body {
     @apply antialiased text-text-main bg-bg-soft;
   }
