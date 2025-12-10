@@ -1,10 +1,11 @@
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import type { FaceHistoryRecord } from '../../services/historyStore';
 import { loadHistory, clearHistory, deleteRecord, updateRecordNote } from '../../services/historyStore';
 import { getWeeklyStats, buildWeeklySummary, type WeeklyStats } from './historyStats';
 import { TrendChartCard, TagStatsCard } from './HistoryAnalytics';
 import { pickQuestionsForRecord, pickPracticesForRecord } from '../../services/suggestionService';
+import { ShareModal } from '../share/ShareModal';
 
 interface HistoryViewProps {
     onNavigateToToday: () => void;
@@ -337,6 +338,8 @@ interface HistoryDetailOverlayProps {
 export function HistoryDetailOverlay({ record, onClose, onSaveNote }: HistoryDetailOverlayProps) {
     const [note, setNote] = useState(record.note || '');
     const [saved, setSaved] = useState(false);
+    const [showShare, setShowShare] = useState(false);
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     const handleSave = () => {
         onSaveNote(note);
@@ -469,8 +472,20 @@ export function HistoryDetailOverlay({ record, onClose, onSaveNote }: HistoryDet
                     )}
                 </section>
 
-                {/* Finish Button */}
-                <div className="pt-4 pb-8">
+
+
+                {/* 5. Actions */}
+                <div className="flex flex-col gap-3 pt-4 pb-8">
+                    <button
+                        onClick={() => setShowShare(true)}
+                        className="w-full py-3.5 bg-white text-primary border border-pink-200 rounded-2xl font-bold shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2"
+                    >
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                        </svg>
+                        <span>生成今日脸卡图片</span>
+                    </button>
+
                     <button
                         onClick={onClose}
                         className="w-full py-4 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-pink-200 active:scale-95 transition-all flex items-center justify-center gap-2"
@@ -482,6 +497,14 @@ export function HistoryDetailOverlay({ record, onClose, onSaveNote }: HistoryDet
                     </button>
                 </div>
             </div>
+
+            {/* Share Modal */}
+            {showShare && (
+                <ShareModal
+                    record={record}
+                    onClose={() => setShowShare(false)}
+                />
+            )}
         </div>
     );
 }

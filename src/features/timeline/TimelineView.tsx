@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import type { FaceHistoryRecord } from '../../services/historyStore';
 import { loadHistory, deleteRecord, updateRecordNote, saveRecord, hasTodayRecord } from '../../services/historyStore';
 import { CameraModal } from '../today/CameraModal';
-import { analyzeFaceMock as analyzeFace } from '../../services/mockFaceAnalysis';
+import { analyzeFace } from '../../services/faceAnalysis';
 import type { FaceAnalysisResult } from '../../types/analysis';
 import { HistoryDetailOverlay } from '../history/HistoryView';
 import { loadSettings } from '../../services/settingsStore';

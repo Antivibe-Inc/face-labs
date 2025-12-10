@@ -22,4 +22,7 @@ export interface FaceAnalysisResult {
     lifestyle: LifestyleData;
     reflection: ReflectionData;
     timestamp: number;
+    // Optional fields from real AI analysis
+    analysis_confidence?: number;
+    warnings?: string[];
 }
