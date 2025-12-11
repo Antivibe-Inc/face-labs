@@ -18,7 +18,7 @@ export function ScanningOverlay({ image }: ScanningOverlayProps) {
         "正在计算情绪向量...",
         "合成疲劳指数...",
         "同步生理信号...",
-        "生成最终诊断报告..."
+        "生成初步诊断报告..."
     ];
 
     useEffect(() => {
@@ -40,10 +40,10 @@ export function ScanningOverlay({ image }: ScanningOverlayProps) {
                 setScanProgress(prev => Math.min(prev + 0.02, 99.0));
 
                 setMetrics(prev => {
-                    if (prev[0] === "正在从云端同步数据...") return prev;
+                    if (prev[0] === "接下来让我们跟AI心理按摩师聊几句吧...") return prev;
                     // Only add if we've already shown the last analysis step
                     if (prev[0] === analysisSteps[analysisSteps.length - 1]) {
-                        return ["正在从云端同步数据...", ...prev].slice(0, 4);
+                        return ["接下来让我们跟AI心理按摩师聊几句吧...", ...prev].slice(0, 4);
                     }
                     return prev;
                 });

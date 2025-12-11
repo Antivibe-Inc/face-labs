@@ -152,8 +152,62 @@ export function ConversationView({ image, preliminaryAnalysis, onComplete, onCan
 
 
 
+    // Add useRef for the button
+    const speechButtonRef = useRef<HTMLButtonElement>(null);
+
+    // Native event listener attachment for non-passive events
+    useEffect(() => {
+        const button = speechButtonRef.current;
+        if (!button) return;
+
+        const handleTouchStart = (e: TouchEvent) => {
+            e.preventDefault(); // This now works because we use { passive: false }
+            startRecording();
+        };
+
+        const handleTouchEnd = (e: TouchEvent) => {
+            e.preventDefault();
+            stopRecording();
+        };
+
+        // Also handle mouse down/up for desktop to prevent focus stealing
+        const handleMouseDown = (e: MouseEvent) => {
+            e.preventDefault();
+            startRecording();
+        };
+
+        const handleMouseUp = (e: MouseEvent) => {
+            e.preventDefault();
+            stopRecording();
+        };
+
+        button.addEventListener('touchstart', handleTouchStart, { passive: false });
+        button.addEventListener('touchend', handleTouchEnd, { passive: false });
+        button.addEventListener('touchcancel', handleTouchEnd, { passive: false }); // Reuse end handler for cancel
+
+        button.addEventListener('mousedown', handleMouseDown);
+        button.addEventListener('mouseup', handleMouseUp);
+        button.addEventListener('mouseleave', handleMouseUp); // Handle drag out
+
+        const handleContextMenu = (e: Event) => {
+            e.preventDefault();
+        };
+        button.addEventListener('contextmenu', handleContextMenu);
+
+        return () => {
+            button.removeEventListener('touchstart', handleTouchStart);
+            button.removeEventListener('touchend', handleTouchEnd);
+            button.removeEventListener('touchcancel', handleTouchEnd);
+            button.removeEventListener('mousedown', handleMouseDown);
+            button.removeEventListener('mouseup', handleMouseUp);
+            button.removeEventListener('mouseleave', handleMouseUp);
+            button.removeEventListener('contextmenu', handleContextMenu);
+        };
+    }, [startRecording, stopRecording]);
+
     return (
         <div className="fixed inset-0 z-[100] bg-bg-soft flex flex-col animate-fade-in">
+            {/* ... (rest of the file remains, but button JSX changes below) */}
             {/* Header */}
             <div className="px-4 py-3 bg-white/80 backdrop-blur border-b border-border-soft flex items-center justify-between shadow-sm">
                 <button onClick={onCancel} className="text-text-subtle text-sm">取消</button>
@@ -197,12 +251,9 @@ export function ConversationView({ image, preliminaryAnalysis, onComplete, onCan
                     {!isSupported && <div className="text-xs text-red-500">浏览器不支持语音输入，请打字。</div>}
 
                     <button
-                        onMouseDown={startRecording}
-                        onMouseUp={stopRecording}
-                        onTouchStart={startRecording}
-                        onTouchEnd={stopRecording}
+                        ref={speechButtonRef}
                         disabled={isProcessing}
-                        className={`w-20 h-20 rounded-full flex items-center justify-center shadow-lg transition-all ${isRecording
+                        className={`w-20 h-20 rounded-full flex items-center justify-center shadow-lg transition-all select-none ${isRecording
                             ? 'bg-primary scale-110 ring-4 ring-primary/30'
                             : 'bg-white border-2 border-primary text-primary'
                             }`}
@@ -231,6 +282,6 @@ export function ConversationView({ image, preliminaryAnalysis, onComplete, onCan
                     </button>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
