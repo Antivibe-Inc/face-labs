@@ -1,4 +1,4 @@
-import type { FaceAnalysisResult, EmotionData, LifestyleData, ReflectionData } from '../types/analysis';
+import type { FaceAnalysisResult } from '../types/analysis';
 import { analyzeFaceMock } from './mockFaceAnalysis';
 import { callGeminiAnalysis, type GeminiFaceAnalysis } from './geminiService';
 
