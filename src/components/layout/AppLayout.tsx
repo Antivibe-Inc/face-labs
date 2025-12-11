@@ -9,10 +9,10 @@ export function AppLayout() {
     const [activeTab, setActiveTab] = useState<'timeline' | 'insights' | 'settings'>('timeline');
 
     return (
-        <div className="h-screen w-full bg-bg-canvas flex flex-col max-w-md mx-auto shadow-2xl overflow-hidden font-sans text-text-main relative">
+        <div className="h-[100dvh] w-full bg-bg-canvas flex flex-col max-w-md mx-auto shadow-2xl overflow-hidden font-sans text-text-main relative">
 
             {/* Main Content Area */}
-            <main className="flex-1 overflow-y-auto no-scrollbar relative">
+            <main className="flex-1 overflow-hidden relative">
                 {activeTab === 'timeline' && (
                     <TimelineView />
                 )}

@@ -25,4 +25,11 @@ export interface FaceAnalysisResult {
     // Optional fields from real AI analysis
     analysis_confidence?: number;
     warnings?: string[];
+    // Conversation data
+    dialog_summary?: string;
+}
+
+export interface ConversationMessage {
+    role: 'user' | 'assistant';
+    content: string;
 }

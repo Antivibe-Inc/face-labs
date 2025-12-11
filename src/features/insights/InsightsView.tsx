@@ -26,11 +26,11 @@ export function InsightsView({ onNavigateToTimeline }: InsightsViewProps) {
     const weeklyStats = getWeeklyStats(history);
 
     return (
-        <div className="p-4 pb-24 space-y-4 animate-fade-in">
+        <div className="p-4 pb-24 space-y-4 animate-fade-in h-full overflow-y-auto no-scrollbar">
             {/* Header */}
             <div className="flex flex-col items-center text-center">
-                <h2 className="text-xl font-bold text-text-main">脸部洞察</h2>
-                <p className="text-xs text-text-subtle mt-0.5">你的状态仪表盘</p>
+                <h2 className="text-xl font-bold text-text-main">最近一段时间的你</h2>
+                <p className="text-xs text-text-subtle mt-0.5">从脸卡中整理出的趋势和小提示</p>
             </div>
 
             {/* A. Weekly Overview */}

@@ -440,6 +440,19 @@ export function HistoryDetailOverlay({ record, onClose, onSaveNote }: HistoryDet
                     </div>
                 </section>
 
+                {/* Dialogue Summary Section */}
+                {record.dialogSummary && (
+                    <div className="mb-6 bg-primary/5 rounded-3xl p-5 border border-primary/10">
+                        <h3 className="text-sm font-bold text-primary mb-3 flex items-center gap-2">
+                            <span className="text-lg">💬</span> 今天的小对话
+                        </h3>
+                        <p className="text-sm text-text-main leading-relaxed">
+                            {record.dialogSummary}
+                        </p>
+                        {/* Optional: Expand for full transcript button could go here */}
+                    </div>
+                )}
+
                 {/* 3. Reflection */}
                 <section className="bg-white p-5 rounded-2xl shadow-soft border border-border-soft">
                     <h3 className="text-xs font-bold uppercase tracking-wider text-primary mb-3">03 自我观察与提问</h3>

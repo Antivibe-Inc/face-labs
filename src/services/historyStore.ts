@@ -21,6 +21,9 @@ export interface FaceHistoryRecord {
         questions: string[];
     };
     note?: string;      // User-written note
+    // Conversation History
+    conversationTranscript?: { role: 'user' | 'assistant'; content: string }[];
+    dialogSummary?: string;
 }
 
 const STORAGE_KEY = 'faceLabs_history';
@@ -143,6 +146,21 @@ export function createRecordFromAnalysis(
         reflection: {
             summary: analysis.reflection.summary,
             questions: analysis.reflection.questions,
-        }
+        },
+        // Conversation (optional)
+        dialogSummary: analysis.dialog_summary,
+        // Transcript passed separately or attached to analysis? 
+        // For now, let's assume we pass it in if available, or it's not in the base create function yet.
+        // Logic will be handled in caller usually, but let's allow it to be injected if we update signature.
     };
+}
+
+export function createRecordWithConversation(
+    analysis: FaceAnalysisResult,
+    image: string,
+    transcript: { role: 'user' | 'assistant'; content: string }[]
+): FaceHistoryRecord {
+    const record = createRecordFromAnalysis(analysis, image);
+    record.conversationTranscript = transcript;
+    return record;
 }

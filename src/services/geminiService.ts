@@ -1,3 +1,4 @@
+
 export interface GeminiFaceAnalysis {
     energy_level: number;
     mood_brightness: number;
@@ -91,42 +92,204 @@ export async function callGeminiAnalysis(image: File | string): Promise<GeminiFa
 
 现在请你根据这张照片，输出一个 JSON 对象，必须严格符合上述字段要求，不要输出任何多余文字。`;
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            contents: [{
-                parts: [
-                    { text: prompt },
-                    { inline_data: { mime_type: "image/jpeg", data: base64Image } }
-                ]
-            }]
-        })
-    });
-
-    if (!response.ok) {
-        const errorBody = await response.text();
-        console.error("Gemini API Error Body:", errorBody);
-        throw new Error(`Gemini API Error: ${response.status} ${response.statusText} - ${errorBody}`);
-    }
-
-    const data = await response.json();
-    const textOutput = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!textOutput) {
-        throw new Error("No output from Gemini");
-    }
-
-    // Clean up markdown code blocks if present
-    const cleanJson = textOutput.replace(/```json/g, '').replace(/```/g, '').trim();
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
 
     try {
-        const result = JSON.parse(cleanJson);
-        return result as GeminiFaceAnalysis;
-    } catch (e) {
-        console.error("JSON Parse Error:", textOutput);
-        throw new Error("Failed to parse Gemini response");
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [
+                        { text: prompt },
+                        { inline_data: { mime_type: "image/jpeg", data: base64Image } }
+                    ]
+                }]
+            }),
+            signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+            const errorBody = await response.text();
+            console.error("Gemini API Error Body:", errorBody);
+            throw new Error(`Gemini API Error: ${response.status} ${response.statusText} - ${errorBody}`);
+        }
+
+        const data = await response.json();
+        const textOutput = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (!textOutput) {
+            throw new Error("No output from Gemini");
+        }
+
+        // Clean up markdown code blocks if present
+        const cleanJson = textOutput.replace(/```json/g, '').replace(/```/g, '').trim();
+
+        try {
+            const result = JSON.parse(cleanJson);
+            return result as GeminiFaceAnalysis;
+        } catch (e) {
+            console.error("JSON Parse Error:", textOutput);
+            throw new Error("Failed to parse Gemini response");
+        }
+    } catch (error) {
+        clearTimeout(timeoutId);
+        throw error;
+    }
+}
+
+// --- Conversation & Final Analysis ---
+
+export interface ConversationReply {
+    observation: string;
+    question: string;
+    isFinal: boolean;
+}
+
+export async function generateConversationReply(
+    image: string,
+    preliminaryAnalysis: GeminiFaceAnalysis,
+    history: { role: 'user' | 'assistant'; content: string }[]
+): Promise<ConversationReply> {
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    if (!apiKey) throw new Error("No Gemini API Key provided");
+
+    const analysisContext = JSON.stringify(preliminaryAnalysis);
+    const historyContext = history.map(m => `${m.role}: ${m.content}`).join('\n');
+
+    // 判断是否是第一轮对话
+    const isFirstTurn = history.length === 0;
+
+    const prompt = `
+角色：你是一个温暖、敏锐的"脸部状态观察助手"。
+任务：基于用户的照片分析结果，与用户自由对话，倾听他们的状态和心事。
+
+输入信息：
+1. 初步分析结果：${analysisContext}
+2. 对话历史：
+${historyContext || '(首轮对话)'}
+
+要求：
+1. **引导或跟上节奏**：根据用户的回复，自然地延续对话。可以：
+   - 对用户说的内容表示理解或共鸣
+   - 提出相关的开放式问题，深入了解
+   - 或者就用户关心的话题展开讨论
+2. **不做诊断**：绝对禁止医学或心理学诊断，只描述状态（累、紧绷、放松）。
+3. **简洁自然**：每次回复不超过 50 字，像朋友聊天一样自然。
+4. **永远不要主动结束对话**：isFinal 始终设为 false。用户想结束时会自己点击按钮。
+
+输出格式（JSON）：
+{
+    "observation": "你的回应...",
+    "question": "你的追问或话题延续...",
+    "isFinal": false
+}`;
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+    // 构建请求体：只有第一轮发送图片
+    let parts: any[];
+    if (isFirstTurn) {
+        const base64Image = image.includes(',') ? image.split(',')[1] : image;
+        parts = [
+            { text: prompt },
+            { inline_data: { mime_type: "image/jpeg", data: base64Image } }
+        ];
+    } else {
+        // 后续轮次只发送文字，使用更快的模型
+        parts = [{ text: prompt }];
+    }
+
+    // 后续轮次使用更快的 flash 模型
+    const model = 'gemini-2.0-flash';
+
+    try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts }]
+            }),
+            signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) throw new Error("Conversation API failed");
+        const data = await response.json();
+        const textOutput = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!textOutput) throw new Error("No output from Gemini");
+
+        const cleanJson = textOutput.replace(/```json/g, '').replace(/```/g, '').trim();
+        return JSON.parse(cleanJson) as ConversationReply;
+    } catch (error) {
+        clearTimeout(timeoutId);
+        throw error;
+    }
+}
+
+export async function analyzeFaceWithConversation(
+    preliminaryAnalysis: GeminiFaceAnalysis,
+    transcript: { role: 'user' | 'assistant'; content: string }[]
+): Promise<any> {
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    if (!apiKey) throw new Error("No Gemini API Key provided");
+
+    const analysisContext = JSON.stringify(preliminaryAnalysis);
+    const transcriptContext = transcript.map(m => `${m.role}: ${m.content}`).join('\n');
+
+    const prompt = `
+你是一个专业的"脸部状态分析师"。请结合初步分析结果以及对话内容，生成一份最终的详细报告。
+
+输入：
+1. 初步分析（基于照片）：${analysisContext}
+2. 对话内容（用户的真实描述，权重最高）：
+${transcriptContext}
+
+任务：
+综合初步分析和对话内容，输出最终的 JSON 报告。如果用户的主观描述与照片分析不一致，请在 dialog_summary 中体现这种反差或结合。
+
+输出字段要求（JSON）：
+- energy_level (0-10)
+- mood_brightness (0-10)
+- tags (2-4个标签)
+- skin_signals (数组)
+- lifestyle_hints (数组)
+- dialog_summary：用 1-2 句话精炼总结用户在对话中透露的核心状态或心事（中文）。
+
+请返回 JSON 对象。`;
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+    try {
+        // 不需要再发送图片，使用更快的模型
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{ text: prompt }]
+                }]
+            }),
+            signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) throw new Error("Final Analysis API failed");
+        const data = await response.json();
+        const textOutput = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        const cleanJson = textOutput.replace(/```json/g, '').replace(/```/g, '').trim();
+        return JSON.parse(cleanJson);
+    } catch (error) {
+        clearTimeout(timeoutId);
+        throw error;
     }
 }

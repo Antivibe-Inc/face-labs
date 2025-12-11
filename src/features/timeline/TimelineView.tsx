@@ -1,31 +1,14 @@
-
 import { useState, useRef, useEffect } from 'react';
 import type { FaceHistoryRecord } from '../../services/historyStore';
-import { loadHistory, deleteRecord, updateRecordNote, saveRecord, hasTodayRecord } from '../../services/historyStore';
+import { loadHistory, deleteRecord, updateRecordNote, saveRecord, hasTodayRecord, createRecordWithConversation, createRecordFromAnalysis } from '../../services/historyStore';
 import { CameraModal } from '../today/CameraModal';
+import { ScanningOverlay } from '../today/ScanningOverlay';
 import { analyzeFace } from '../../services/faceAnalysis';
 import type { FaceAnalysisResult } from '../../types/analysis';
+import { ConversationView } from '../conversation/ConversationView';
 import { HistoryDetailOverlay } from '../history/HistoryView';
 import { loadSettings } from '../../services/settingsStore';
-
-// --- Helper: Create Record ---
-function createRecordFromAnalysis(analysis: FaceAnalysisResult, imageUrl: string): FaceHistoryRecord {
-    const now = new Date();
-    const dateLabel = now.toLocaleString('zh-CN', {
-        year: 'numeric', month: 'long', day: 'numeric',
-        hour: '2-digit', minute: '2-digit', hour12: false
-    });
-
-    return {
-        id: Date.now().toString(36) + Math.random().toString(36).substr(2),
-        date: now.toISOString(),
-        dateLabel,
-        thumbnail: imageUrl, // In real app, might want to generate a smaller thumb
-        emotion: analysis.emotion,
-        lifestyle: analysis.lifestyle,
-        reflection: analysis.reflection,
-    };
-}
+import { callGeminiAnalysis, type GeminiFaceAnalysis } from '../../services/geminiService';
 
 // --- Component: Entry Card (Today) ---
 interface EntryCardProps {
@@ -50,8 +33,8 @@ function EntryCard({ onTakePhoto, isAnalyzing, isActive }: EntryCardProps) {
                 观察今天的自己
             </h2>
             <p className="text-sm text-text-subtle text-center leading-relaxed mb-10 max-w-xs">
-                相由心生，亦可心随相转。<br />
-                拍一张现在的脸，看看它想告诉你什么。
+                今天先看一眼自己的脸。<br />
+                拍一张现在的样子，看看它想提醒你什么。
             </p>
 
             <div className="w-full space-y-4">
@@ -75,8 +58,6 @@ function EntryCard({ onTakePhoto, isAnalyzing, isActive }: EntryCardProps) {
                         </>
                     )}
                 </button>
-
-
             </div>
 
             <div className="absolute bottom-6 text-[10px] text-text-subtle opacity-50 text-center px-6">
@@ -182,8 +163,15 @@ function FaceCard({ record, onDelete, onClick, isActive }: FaceCardProps) {
 
 export function TimelineView() {
     const [history, setHistory] = useState<FaceHistoryRecord[]>([]);
-    const [isCameraOpen, setIsCameraOpen] = useState(false);
+    const [showCamera, setShowCamera] = useState(false);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+    // Conversation State
+    const [showConversation, setShowConversation] = useState(false);
+    const [currentImage, setCurrentImage] = useState<string | null>(null);
+    const [preliminaryAnalysis, setPreliminaryAnalysis] = useState<GeminiFaceAnalysis | null>(null);
+
+    // UI State
     const [selectedRecord, setSelectedRecord] = useState<FaceHistoryRecord | null>(null);
     const [activeIndex, setActiveIndex] = useState(0);
     const [showDailyLimitAlert, setShowDailyLimitAlert] = useState(false); // Alert state
@@ -284,35 +272,73 @@ export function TimelineView() {
     };
 
     const handleCameraCapture = async (blob: Blob) => {
-        setIsCameraOpen(false);
+        setShowCamera(false);
         setIsAnalyzing(true);
-
         try {
-            // Convert to Base64 for persistence
+            // Convert to Base64
             const imageUrl = await blobToBase64(blob);
+            setCurrentImage(imageUrl);
 
-            await new Promise(resolve => setTimeout(resolve, 800)); // Minimal delay for UX
-            const analysis = await analyzeFace(imageUrl);
-            const newRecord = createRecordFromAnalysis(analysis, imageUrl);
+            // Preliminary Analysis
+            // Note: We use callGeminiAnalysis directly to get the raw signals for conversation
+            const raw = await callGeminiAnalysis(imageUrl);
 
-            const success = saveRecord(newRecord);
+            setPreliminaryAnalysis(raw);
+            setShowConversation(true);
+            setIsAnalyzing(false);
+
+        } catch (error) {
+            console.error("Preliminary analysis failed", error);
+            setIsAnalyzing(false);
+            alert("分析服务暂不可用，已直接保存照片。");
+
+            // Fallback: Skip conversation
+            if (currentImage) {
+                // Reuse analyzeFace which has mock fallback
+                const result = await analyzeFace(currentImage);
+                saveAndRedirect(result, currentImage);
+            }
+        }
+    };
+
+    const handleConversationComplete = (result: FaceAnalysisResult, transcript?: { role: 'user' | 'assistant'; content: string }[]) => {
+        setShowConversation(false);
+
+        // Save Record
+        if (currentImage) {
+            const record = createRecordWithConversation(result, currentImage, transcript || []);
+            const success = saveRecord(record); // Default limit applies
 
             if (!success) {
-                // If blocked by daily limit (though UI should have prevented this)
                 setShowDailyLimitAlert(true);
                 return;
             }
 
-            // Refresh and View
-            setHistory(loadHistory()); // This puts new record at top (index 0 of history array -> index 1 of View)
-            setSelectedRecord(newRecord); // Auto-open report view
+            // Redirect
+            setHistory(loadHistory());
+            setSelectedRecord(record);
             scrollToNewest();
-        } catch (error) {
-            console.error("Analysis failed", error);
-            alert("分析失败，请重试");
-        } finally {
-            setIsAnalyzing(false);
         }
+        setCurrentImage(null);
+        setPreliminaryAnalysis(null);
+    };
+
+    const handleConversationCancel = () => {
+        setShowConversation(false);
+        setCurrentImage(null);
+        setPreliminaryAnalysis(null);
+    };
+
+    const saveAndRedirect = (result: FaceAnalysisResult, image: string) => {
+        const record = createRecordFromAnalysis(result, image);
+        const success = saveRecord(record);
+        if (!success) {
+            setShowDailyLimitAlert(true);
+            return;
+        }
+        setHistory(loadHistory());
+        setSelectedRecord(record);
+        scrollToNewest();
     };
 
     const handleDelete = (id: string, e: React.MouseEvent) => {
@@ -320,6 +346,9 @@ export function TimelineView() {
         if (confirm("确定要删除这张脸卡吗？删除后无法恢复。")) {
             deleteRecord(id);
             setHistory(loadHistory());
+            if (selectedRecord?.id === id) {
+                setSelectedRecord(null);
+            }
         }
     };
 
@@ -334,9 +363,9 @@ export function TimelineView() {
             <div className="pt-4 pb-2 px-6 flex flex-col items-center text-center">
                 <h1 className="text-xl font-bold text-text-main">脸卡时间线</h1>
                 <p className="text-xs text-text-subtle mt-0.5 flex items-center gap-2">
-                    <span>记录每天的自己</span>
+                    <span>用一张脸，记录每一天的自己</span>
                     <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                    <span>{history.length} 张卡片</span>
+                    <span>已留下 {history.length} 张卡片</span>
                 </p>
             </div>
 
@@ -356,7 +385,7 @@ export function TimelineView() {
                             if (hasTodayRecord()) {
                                 setShowDailyLimitAlert(true);
                             } else {
-                                setIsCameraOpen(true);
+                                setShowCamera(true);
                             }
                         }}
                         isAnalyzing={isAnalyzing}
@@ -395,10 +424,24 @@ export function TimelineView() {
             )}
 
             {/* Overlays */}
-            {isCameraOpen && (
+            {showCamera && (
                 <CameraModal
                     onPhotoTaken={(file) => handleCameraCapture(file)}
-                    onCancel={() => setIsCameraOpen(false)}
+                    onCancel={() => setShowCamera(false)}
+                />
+            )}
+
+            {/* Scanning Overlay - shown during analysis */}
+            {isAnalyzing && currentImage && (
+                <ScanningOverlay image={currentImage} />
+            )}
+
+            {showConversation && currentImage && preliminaryAnalysis && (
+                <ConversationView
+                    image={currentImage}
+                    preliminaryAnalysis={preliminaryAnalysis}
+                    onComplete={handleConversationComplete}
+                    onCancel={handleConversationCancel}
                 />
             )}
 
