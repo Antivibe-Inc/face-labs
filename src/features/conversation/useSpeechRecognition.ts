@@ -44,13 +44,24 @@ export function useSpeechRecognition() {
         }
     }, []);
 
-    const startRecording = useCallback(() => {
+    const startRecording = useCallback(async () => {
         if (recognitionRef.current) {
             try {
+                // On mobile, we need to explicitly request microphone permission first
+                // This triggers the browser's permission dialog
+                await navigator.mediaDevices.getUserMedia({ audio: true });
+
                 setTranscript(''); // Clear previous
                 recognitionRef.current.start();
-            } catch (e) {
+            } catch (e: any) {
                 console.error("Start recording failed", e);
+                if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
+                    setError('请允许麦克风权限');
+                } else if (e.name === 'NotFoundError') {
+                    setError('未找到麦克风设备');
+                } else {
+                    setError('无法启动语音识别: ' + e.message);
+                }
             }
         }
     }, []);

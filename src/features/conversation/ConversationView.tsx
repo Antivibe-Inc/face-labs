@@ -25,7 +25,7 @@ export function ConversationView({ image, preliminaryAnalysis, onComplete, onCan
     const [particleMode, setParticleMode] = useState<'idle' | 'listening' | 'speaking' | 'thinking'>('idle');
 
     // STT Hook
-    const { isRecording, transcript, startRecording, stopRecording, isSupported } = useSpeechRecognition();
+    const { isRecording, transcript, error: speechError, startRecording, stopRecording, isSupported } = useSpeechRecognition();
     const hasInitialized = useRef(false);
 
     // Initial AI Message (Round 0)
@@ -224,6 +224,7 @@ export function ConversationView({ image, preliminaryAnalysis, onComplete, onCan
             {/* 4. Bottom Controls */}
             <div className="w-full pb-16 pt-8 z-20 flex flex-col items-center justify-end bg-gradient-to-t from-black via-black/80 to-transparent">
                 {!isSupported && <div className="text-xs text-red-500 mb-4">浏览器不支持语音，请更换 Chrome/Safari</div>}
+                {speechError && <div className="text-xs text-red-500 mb-4">{speechError}</div>}
 
                 <div className="relative group">
                     {/* Pulse Rings */}
