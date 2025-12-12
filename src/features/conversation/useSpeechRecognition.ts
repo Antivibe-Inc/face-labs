@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 export function useSpeechRecognition() {
     const [isRecording, setIsRecording] = useState(false);
@@ -11,8 +11,8 @@ export function useSpeechRecognition() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (SpeechRecognition) {
             const recognition = new SpeechRecognition();
-            recognition.continuous = false; // Stop after one sentence/utterance
-            recognition.interimResults = false;
+            recognition.continuous = true; // Keep listening until stopped
+            recognition.interimResults = true;
             recognition.lang = 'zh-CN';
 
             recognition.onstart = () => {
@@ -25,8 +25,12 @@ export function useSpeechRecognition() {
             };
 
             recognition.onresult = (event: any) => {
-                const text = event.results[0][0].transcript;
-                setTranscript(text);
+                // With continuous=true, we get multiple results. We need the latest combined one.
+                let finalText = '';
+                for (let i = 0; i < event.results.length; ++i) {
+                    finalText += event.results[i][0].transcript;
+                }
+                setTranscript(finalText);
             };
 
             recognition.onerror = (event: any) => {
@@ -40,7 +44,7 @@ export function useSpeechRecognition() {
         }
     }, []);
 
-    const startRecording = () => {
+    const startRecording = useCallback(() => {
         if (recognitionRef.current) {
             try {
                 setTranscript(''); // Clear previous
@@ -49,13 +53,13 @@ export function useSpeechRecognition() {
                 console.error("Start recording failed", e);
             }
         }
-    };
+    }, []);
 
-    const stopRecording = () => {
+    const stopRecording = useCallback(() => {
         if (recognitionRef.current) {
             recognitionRef.current.stop();
         }
-    };
+    }, []);
 
     return {
         isRecording,
