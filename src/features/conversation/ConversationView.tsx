@@ -61,6 +61,7 @@ export function ConversationView({ image, preliminaryAnalysis, onComplete, onCan
 
     const startTurn = async (history: Message[]) => {
         setDisplayMode('thinking');
+        setCurrentText("思考中..."); // Clear user text immediately to prevent duplicate display
         try {
             const reply = await generateConversationReply(image, preliminaryAnalysis, history);
 
@@ -146,78 +147,35 @@ export function ConversationView({ image, preliminaryAnalysis, onComplete, onCan
         }
     };
 
-    // --- Button Ref & Events (Touch/Hold Logic) ---
-    const speechButtonRef = useRef<HTMLButtonElement>(null);
-    // Use a ref to track "intent to record" synchronously, avoiding React render lag
-    const isHandlingInputRef = useRef(false);
+    // --- Pointer Events for Robust Hold-to-Speak ---
+    const handlePointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
+        console.log("[Pointer] DOWN - displayMode:", displayMode, "isRecording:", isRecording);
 
-    // Sync ref (as a fallback safety)
-    useEffect(() => {
-        if (!isRecording) {
-            isHandlingInputRef.current = false;
+        if (displayMode === 'thinking' || displayMode === 'ai_speaking') {
+            console.log("[Pointer] Blocked by displayMode");
+            return;
         }
-    }, [isRecording]);
 
-    useEffect(() => {
-        const button = speechButtonRef.current;
-        if (!button) return;
+        // Capture pointer so we track it even if it leaves the button
+        e.currentTarget.setPointerCapture(e.pointerId);
+        console.log("[Pointer] Starting recording...");
 
-        const cleanupListeners = () => {
-            window.removeEventListener('touchend', handleGlobalEnd);
-            window.removeEventListener('touchcancel', handleGlobalEnd);
-            window.removeEventListener('mouseup', handleGlobalEnd);
-        };
+        if (!isRecording) {
+            startRecording();
+        }
+    };
 
-        const handleGlobalEnd = () => {
-            stopRecording();
-            isHandlingInputRef.current = false; // Release lock
-            cleanupListeners();
-        };
+    const handlePointerUp = (e: React.PointerEvent<HTMLButtonElement>) => {
+        console.log("[Pointer] UP - stopping recording");
+        e.currentTarget.releasePointerCapture(e.pointerId);
+        stopRecording();
+    };
 
-        const handleStart = (e: Event) => {
-            // If it's a touch event, prevent default to stop ghost mouse clicks
-            if (e.type === 'touchstart') {
-                e.preventDefault();
-            }
-
-            // Synchronous Lock Check
-            if (isHandlingInputRef.current) {
-                return;
-            }
-
-            if (!isRecording) {
-                isHandlingInputRef.current = true; // Set lock immediately
-                startRecording();
-
-                window.addEventListener('touchend', handleGlobalEnd);
-                window.addEventListener('touchcancel', handleGlobalEnd);
-                window.addEventListener('mouseup', handleGlobalEnd);
-            }
-        };
-
-        const handleTouchStart = (e: TouchEvent) => handleStart(e);
-        const handleMouseDown = (e: MouseEvent) => handleStart(e);
-        const handleContextMenu = (e: Event) => e.preventDefault();
-
-        // Safety cleanup when component unmounts
-        const unmountCleanup = () => {
-            cleanupListeners();
-            isHandlingInputRef.current = false;
-        };
-
-        // Attach start listeners to the BUTTON
-        button.addEventListener('touchstart', handleTouchStart, { passive: false });
-        button.addEventListener('mousedown', handleMouseDown);
-        button.addEventListener('contextmenu', handleContextMenu);
-
-        // Cleanup function for the effect
-        return () => {
-            button.removeEventListener('touchstart', handleTouchStart);
-            button.removeEventListener('mousedown', handleMouseDown);
-            button.removeEventListener('contextmenu', handleContextMenu);
-            unmountCleanup();
-        };
-    }, [startRecording, stopRecording]); // Removed isRecording from deps!
+    const handlePointerCancel = (e: React.PointerEvent<HTMLButtonElement>) => {
+        console.log("[Pointer] CANCEL - stopping recording");
+        e.currentTarget.releasePointerCapture(e.pointerId);
+        stopRecording();
+    };
 
 
     return (
@@ -254,6 +212,7 @@ export function ConversationView({ image, preliminaryAnalysis, onComplete, onCan
                             speed={60}
                             onComplete={() => {
                                 if (displayMode === 'ai_speaking') {
+                                    setDisplayMode('idle'); // Unlock button when AI finishes speaking
                                     setParticleMode('idle'); // Stop waving when text finishes
                                 }
                             }}
@@ -276,9 +235,14 @@ export function ConversationView({ image, preliminaryAnalysis, onComplete, onCan
                     )}
 
                     <button
-                        ref={speechButtonRef}
-                        disabled={displayMode === 'thinking' || displayMode === 'ai_speaking'} // Disable while AI is thinking/talking?? Actually, usually we allow interruption. But let's keep it simple: blocking for now.
-                        className={`relative w-24 h-24 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.1)] transition-all duration-300 ${isRecording
+                        onPointerDown={handlePointerDown}
+                        onPointerUp={handlePointerUp}
+                        onPointerCancel={handlePointerCancel}
+                        // Prevent default context menu on long press
+                        onContextMenu={(e) => e.preventDefault()}
+                        disabled={displayMode === 'thinking' || displayMode === 'ai_speaking'}
+                        style={{ touchAction: 'none' }} // Critical for preventing scroll/zoom while holding
+                        className={`relative w-24 h-24 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.1)] transition-all duration-300 select-none ${isRecording
                             ? 'bg-cyan-600 scale-110 shadow-[0_0_50px_rgba(8,145,178,0.5)]'
                             : displayMode === 'thinking'
                                 ? 'bg-neutral-800 border-2 border-neutral-700 opacity-50 cursor-not-allowed'
