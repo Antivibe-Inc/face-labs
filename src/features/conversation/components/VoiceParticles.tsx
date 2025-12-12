@@ -19,7 +19,7 @@ interface Particle {
 export function VoiceParticles({ mode }: VoiceParticlesProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const particlesRef = useRef<Particle[]>([]);
-    const frameRef = useRef<number>();
+    const frameRef = useRef<number>(0);
 
     useEffect(() => {
         const canvas = canvasRef.current;

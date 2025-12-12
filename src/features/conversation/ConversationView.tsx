@@ -15,7 +15,7 @@ interface ConversationViewProps {
 type Message = { role: 'user' | 'assistant'; content: string };
 type DisplayMode = 'ai_speaking' | 'user_speaking' | 'thinking' | 'idle';
 
-export function ConversationView({ image, preliminaryAnalysis, onComplete, onCancel }: ConversationViewProps) {
+export function ConversationView({ image, preliminaryAnalysis, onComplete, onCancel: _ }: ConversationViewProps) {
     const [messages, setMessages] = useState<Message[]>([]);
 
     // Core States
@@ -168,7 +168,7 @@ export function ConversationView({ image, preliminaryAnalysis, onComplete, onCan
             window.removeEventListener('mouseup', handleGlobalEnd);
         };
 
-        const handleGlobalEnd = (e: Event) => {
+        const handleGlobalEnd = () => {
             stopRecording();
             isHandlingInputRef.current = false; // Release lock
             cleanupListeners();
