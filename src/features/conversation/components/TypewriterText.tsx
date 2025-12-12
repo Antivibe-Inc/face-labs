@@ -50,10 +50,24 @@ export function TypewriterText({ text, speed = 50, onComplete }: TypewriterTextP
     }, [text, speed, onComplete]);
 
     return (
-        <p className="text-xl md:text-2xl font-serif leading-relaxed text-white/90 drop-shadow-md text-center max-w-2xl mx-auto px-6">
+        <p
+            className="text-base md:text-lg font-mono tracking-wider leading-relaxed text-center max-w-2xl mx-auto px-6"
+            style={{
+                color: '#86efac', // green-300 (softer)
+                textShadow: '0 0 10px rgba(134, 239, 172, 0.4), 0 0 20px rgba(134, 239, 172, 0.25), 0 0 30px rgba(134, 239, 172, 0.1)',
+                letterSpacing: '0.05em'
+            }}
+        >
             {displayedText}
             {displayedText.length < text.length && (
-                <span className="animate-pulse ml-1 text-cyan-400">|</span>
+                <span
+                    className="ml-1 inline-block"
+                    style={{
+                        color: '#22c55e', // green-500
+                        animation: 'blink 0.8s infinite',
+                        textShadow: '0 0 8px rgba(34, 197, 94, 0.9)'
+                    }}
+                >▌</span>
             )}
         </p>
     );

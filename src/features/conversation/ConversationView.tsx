@@ -42,13 +42,12 @@ export function ConversationView({ image, preliminaryAnalysis, onComplete, onCan
         if (isRecording) {
             setDisplayMode('user_speaking');
             setParticleMode('listening');
-            setCurrentText(transcript || "正在聆听...");
+            setCurrentText(transcript || "");
         } else if (displayMode === 'thinking') {
             setParticleMode('thinking');
-            // Do NOT overwrite currentText with "Thinking..." here. 
-            // Keep showing the user's last words or "Thinking" if it was empty.
+            // Do NOT overwrite currentText here, keep it empty
             if (!currentText || currentText === "Thinking...") {
-                setCurrentText("Thinking...");
+                setCurrentText("");
             }
         } else if (displayMode === 'ai_speaking') {
             setParticleMode('speaking');
@@ -61,7 +60,7 @@ export function ConversationView({ image, preliminaryAnalysis, onComplete, onCan
 
     const startTurn = async (history: Message[]) => {
         setDisplayMode('thinking');
-        setCurrentText("思考中..."); // Clear user text immediately to prevent duplicate display
+        setCurrentText(""); // Clear user text immediately to prevent duplicate display
         try {
             const reply = await generateConversationReply(image, preliminaryAnalysis, history);
 
@@ -202,8 +201,16 @@ export function ConversationView({ image, preliminaryAnalysis, onComplete, onCan
                         If AI is speaking, use Typewriter. 
                     */}
                     {displayMode === 'user_speaking' ? (
-                        <p className="text-xl md:text-2xl font-medium text-cyan-200 animate-pulse">
+                        <p className="text-base md:text-lg font-medium text-cyan-200">
                             {currentText}
+                            <span
+                                className="ml-1 inline-block"
+                                style={{
+                                    color: '#67e8f9',
+                                    animation: 'blink 0.8s infinite',
+                                    textShadow: '0 0 6px rgba(103, 232, 249, 0.8)'
+                                }}
+                            >▌</span>
                         </p>
                     ) : (
                         <TypewriterText
