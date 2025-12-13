@@ -54,12 +54,12 @@ export function useSoundGen(): SoundGenReturn {
         const variation = Math.random() * 100 - 50;
         // Use sine wave for softness, lower frequency (300-400Hz)
         // Very short duration (0.03s) to avoid overlapping "buzz"
-        playTone(400 + variation, 'sine', 0.03, 0.02);
+        playTone(400 + variation, 'sine', 0.03, 0.08); // Boosted volume
     }, [initAudio, playTone]);
 
     const playClick = useCallback(() => {
         initAudio();
-        playTone(600, 'sine', 0.1, 0.05);
+        playTone(600, 'sine', 0.1, 0.15); // Boosted volume
     }, [initAudio, playTone]);
 
     const playModeSwitch = useCallback((_from: string, to: string) => {
@@ -74,7 +74,7 @@ export function useSoundGen(): SoundGenReturn {
             const gain = ctx.createGain();
             osc.frequency.setValueAtTime(200, now);
             osc.frequency.exponentialRampToValueAtTime(600, now + 0.3);
-            gain.gain.setValueAtTime(0.1, now);
+            gain.gain.setValueAtTime(0.2, now); // Boosted from 0.1
             gain.gain.linearRampToValueAtTime(0, now + 0.3);
             osc.connect(gain);
             gain.connect(ctx.destination);
@@ -92,7 +92,7 @@ export function useSoundGen(): SoundGenReturn {
             osc1.frequency.setValueAtTime(440, now); // A4
             osc2.frequency.setValueAtTime(554.37, now); // C#5
 
-            gain.gain.setValueAtTime(0.05, now);
+            gain.gain.setValueAtTime(0.15, now); // Boosted from 0.05
             gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
 
             osc1.connect(gain);

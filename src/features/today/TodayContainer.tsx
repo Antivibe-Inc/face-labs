@@ -2,18 +2,21 @@ import { useState, useEffect } from 'react';
 import { InitialView } from './InitialView';
 import { AnalyzingView } from './AnalyzingView';
 import { ReportView } from './ReportView';
-import { analyzeFaceMock } from '../../services/mockFaceAnalysis';
+import { ConversationView } from '../conversation/ConversationView';
+import { callGeminiAnalysis, mapGeminiToAppResult, type GeminiFaceAnalysis } from '../../services/geminiService';
+// import { analyzeFaceMock } from '../../services/mockFaceAnalysis';
 import type { FaceAnalysisResult } from '../../types/analysis';
 import { createRecordFromAnalysis, saveRecord, loadHistory } from '../../services/historyStore';
 import { loadSettings } from '../../services/settingsStore';
 
 
-type Step = 'initial' | 'analyzing' | 'report';
+type Step = 'initial' | 'analyzing' | 'conversation' | 'report';
 
 export function TodayContainer() {
     const [step, setStep] = useState<Step>('initial');
     const [image, setImage] = useState<string | null>(null);
-    const [result, setResult] = useState<FaceAnalysisResult | null>(null);
+    const [visionResult, setVisionResult] = useState<GeminiFaceAnalysis | null>(null); // Preliminary Vision Data
+    const [result, setResult] = useState<FaceAnalysisResult | null>(null); // Final Report Data
     const [showReminder, setShowReminder] = useState(false);
     const [currentRecordId, setCurrentRecordId] = useState<string | null>(null);
 
@@ -57,14 +60,14 @@ export function TodayContainer() {
             setStep('analyzing');
 
             try {
-                const analysis = await analyzeFaceMock(file);
-                setResult(analysis);
-                setStep('report');
+                // Real AI Analysis (Vision Only)
+                const rawAnalysis = await callGeminiAnalysis(imageUrl);
+                setVisionResult(rawAnalysis);
 
-                // Auto-save to history
-                const historyRecord = createRecordFromAnalysis(analysis, imageUrl);
-                saveRecord(historyRecord);
-                setCurrentRecordId(historyRecord.id);
+                // Proceed to Conversation Step instead of Report
+                setStep('conversation');
+
+                // Note: We don't save record yet. We wait for conversation to finish.
             } catch (error) {
                 console.error("Analysis failed:", error);
                 setStep('initial');
@@ -76,8 +79,23 @@ export function TodayContainer() {
     const handleRetake = () => {
         setImage(null);
         setResult(null);
+        setVisionResult(null);
         setStep('initial');
         setCurrentRecordId(null);
+    };
+
+    const handleConversationComplete = (finalResult: FaceAnalysisResult, transcript?: any[]) => {
+        setResult(finalResult);
+        setStep('report');
+
+        // Save Record (Vision + Conversation + Final Report)
+        if (image) {
+            import('../../services/historyStore').then(({ createRecordWithConversation, saveRecord }) => {
+                const record = createRecordWithConversation(finalResult, image, transcript || []);
+                saveRecord(record);
+                setCurrentRecordId(record.id);
+            });
+        }
     };
 
     const handleSaveNote = (note: string) => {
@@ -99,6 +117,18 @@ export function TodayContainer() {
                 />
             )}
             {step === 'analyzing' && <AnalyzingView image={image} />}
+
+            {step === 'conversation' && image && visionResult && (
+                <ConversationView
+                    image={image}
+                    preliminaryAnalysis={visionResult}
+                    // Pass last 5 records for trend analysis (exclude current incomplete session)
+                    pastRecords={loadHistory().slice(0, 5)}
+                    onComplete={handleConversationComplete}
+                    onCancel={handleRetake}
+                />
+            )}
+
             {step === 'report' && result && image && (
                 <ReportView
                     result={result}

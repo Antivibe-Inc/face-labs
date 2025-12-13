@@ -4,6 +4,9 @@ export interface EmotionData {
     mood_brightness: number; // 0-10
     tags: string[]; // 1-4 short strings
     today_suggestion: string;
+    // AI Dynamic Suggestions
+    suggested_questions?: string[];
+    suggested_plans?: string[];
 }
 
 export interface LifestyleData {
@@ -15,6 +18,7 @@ export interface LifestyleData {
 export interface ReflectionData {
     summary: string;
     questions: string[];
+    ai_generated_questions?: string[];
 }
 
 export interface FaceAnalysisResult {

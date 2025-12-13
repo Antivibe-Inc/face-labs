@@ -108,7 +108,10 @@ export function ReportView({ result, image, onRetake, onSaveNote }: ReportViewPr
 
                 <h4 className="text-sm font-semibold text-text-main mb-3">给今天的你，一点点温柔的提问:</h4>
                 <ul className="space-y-3">
-                    {pickQuestionsForRecord({ emotion: result.emotion }).map((q, idx) => (
+                    {(result.reflection.questions && result.reflection.questions.length > 0
+                        ? result.reflection.questions
+                        : pickQuestionsForRecord({ emotion: result.emotion })
+                    ).map((q, idx) => (
                         <li key={idx} className="bg-bg-panel p-3 rounded-2xl text-sm text-text-main border border-border-soft">
                             {q}
                         </li>
@@ -123,7 +126,10 @@ export function ReportView({ result, image, onRetake, onSaveNote }: ReportViewPr
                     从下面挑一件最轻松的，如果今天只做到这一件，也已经很不错了。
                 </p>
                 <div className="space-y-3">
-                    {pickPracticesForRecord({ emotion: result.emotion }).map((practice, idx) => (
+                    {((result.lifestyle.suggested_plans && result.lifestyle.suggested_plans.length > 0)
+                        ? result.lifestyle.suggested_plans
+                        : (result.lifestyle.suggestions && result.lifestyle.suggestions.length > 0 ? result.lifestyle.suggestions : pickPracticesForRecord({ emotion: result.emotion }))
+                    ).map((practice, idx) => (
                         <div key={idx} className="flex items-start gap-3 bg-white p-3 rounded-2xl border border-border-soft/50">
                             <span className="text-lg">🌱</span>
                             <span className="text-sm text-text-main leading-relaxed">{practice}</span>

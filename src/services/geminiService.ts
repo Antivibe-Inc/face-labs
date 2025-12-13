@@ -7,6 +7,38 @@ export interface GeminiFaceAnalysis {
     lifestyle_hints?: string[];
     analysis_confidence?: number;
     warnings?: string[];
+    // New Deep Vision Fields
+    environment_context?: string; // 光线、背景、场景氛围
+    eye_state?: string; // 眼神聚焦度、游离感
+    micro_expression?: string; // 微表情细节 (此字段仅用于调试或展示Deep Dive)
+    deep_reasoning?: string; // 综合推理链
+    suggested_questions?: string[]; // AI生成的反思问题
+    suggested_plans?: string[]; // AI生成的微行动
+}
+
+// Mapper to convert Gemini response to App internal format
+export function mapGeminiToAppResult(gemini: GeminiFaceAnalysis): any {
+    return {
+        emotion: {
+            summary: gemini.deep_reasoning || "AI 正在深度分析中...",
+            energy_level: gemini.energy_level,
+            mood_brightness: gemini.mood_brightness,
+            tags: gemini.tags,
+            today_suggestion: gemini.environment_context || "保持当下的状态。"
+        },
+        lifestyle: {
+            signals: gemini.skin_signals || [],
+            suggestions: gemini.suggested_plans || [],
+            disclaimer: "基于 Gemini 1.5 Pro 视觉推理生成的建议，非医疗诊断。"
+        },
+        reflection: {
+            summary: gemini.eye_state || "眼神是心理的窗户。",
+            questions: gemini.suggested_questions || []
+        },
+        timestamp: Date.now(),
+        // Pass original raw data for deep dive views
+        raw_analysis: gemini
+    };
 }
 
 export async function callGeminiAnalysis(image: File | string): Promise<GeminiFaceAnalysis> {
@@ -45,58 +77,47 @@ export async function callGeminiAnalysis(image: File | string): Promise<GeminiFa
         }
     });
 
-    const prompt = `你是一个谨慎、保守的“脸部状态观察助手”，而不是医生，也不是心理咨询师。
-你将看到一张人脸照片，请你基于**可见的表情、姿态与皮肤状态**，给出一个非常粗略的印象评估。
-不要做任何医学、心理疾病、人格诊断，不要使用“抑郁症”“焦虑症患者”“病态”“人格缺陷”等词语。
-你只从外观和表情推测当下可能的状态，并且承认这些判断可能是错误的。
+    const prompt = `你是一个极具洞察力的“全息状态观察者”。
+你的任务不仅是看脸，更是要通过照片捕捉一个人当下的“完整生命状态”。
+使用的是 Google 最先进的多模态模型，请充分发挥你的视觉推理能力。
 
-你需要输出一个 JSON 对象，字段含义如下（所有字段名必须使用英文）：
+请按照以下维度进行深度扫描：
 
-- energy_level：数字，0–10，表示看起来的精力状态。
-  - 0 = 极度疲惫，几乎撑不住；
-  - 5 = 中性、普通；
-  - 10 = 非常有精神、状态亢奋。
-- mood_brightness：数字，0–10，表示从表情上看，心情的“亮度”。
-  - 0 = 非常低落、沉重；
-  - 5 = 中性、不明显；
-  - 10 = 非常愉快、轻松。
-- tags：字符串数组，用 2–5 个简短的中文标签来描述当下的脸部状态。
-  - 例子：["略疲惫", "平静", "有点紧绷"]、["放松", "有活力"]
-  - 标签要温和、描述状态，不要写诊断类词汇。
-- skin_signals：字符串数组，可选，用于描述肉眼可见的皮肤特征。
-  - 例如：["轻微黑眼圈", "额头有一些痘痘"]
-  - 如果看不清或不确定，可以是空数组。
-- lifestyle_hints：字符串数组，可选，根据表情和皮肤非常保守地推测一些可能的生活习惯倾向。
-  - 例如：["可能最近睡眠不太规律"]、["长时间用眼的可能性略高"]
-  - 如果没有合理依据，请返回空数组。
-- analysis_confidence：0–1 之间的小数，表示你对自己判断的信心程度。
-  - 如果脸部很模糊、遮挡严重、光线很差，信心就应该很低（例如 0.2）。
-- warnings：字符串数组，可选，给出关于图像质量或适用性的提醒。
-  - 例如："光线较暗，脸部细节不清晰"、"脸部只占画面很小一部分"。
+1.  **物理与环境场 (Environment & Physics)**：
+    -   观察光线（是深夜的台灯？还是清晨的阳光？是阴郁还是明亮？）。
+    -   观察背景（是杂乱的工位？温馨的床头？还是空旷的户外？）。
+    -   这暗示了什么样的心理安全感或压力源？
 
-特别重要：
-- 用户只提供了一张照片，你的信息非常有限，很多推测都可能是错的。
-- 不要夸大你的判断，只给出“看起来像是……”的粗略印象。
-- 不要提及你是模型，也不要输出任何解释性文字，**只输出 JSON**。
+2.  **微表情与肌肉张力 (Micro-Expression & Tension)**：
+    -   **眼神**：是聚焦且有神？还是游离、涣散？是有光彩还是暗淡？(Eyes are the window to the soul)
+    -   **肌肉**：额头是否紧绷？咬肌是否在用力？嘴角是自然上扬还是肌肉牵拉（假笑）？肩膀是否耸起？
 
-输出格式示例（注意：这只是示例，不要照抄数值）：
-{
-  "energy_level": 4,
-  "mood_brightness": 6,
-  "tags": ["略疲惫", "平静"],
-  "skin_signals": ["轻微黑眼圈"],
-  "lifestyle_hints": ["可能最近睡眠时间偏短"],
-  "analysis_confidence": 0.6,
-  "warnings": []
-}
+3.  **皮肤与生理信号 (Biological Signals)**：
+    -   黑眼圈、油光、浮肿、甚至头发的凌乱程度，这些都是身体疲劳的直接证据。
 
-现在请你根据这张照片，输出一个 JSON 对象，必须严格符合上述字段要求，不要输出任何多余文字。`;
+基于上述观察，请输出一个 JSON 对象：
+
+- energy_level (0-10): 综合生理能量。结合眼神光彩和肌肉张力判断。
+- mood_brightness (0-10): 综合情绪亮度。结合环境氛围和微表情判断。
+- tags (3-5个): 极具画面感的中文短语。如"深夜emo"、"强撑的疲惫"、"松弛感"、"眼神清澈"。相比之前的形容词，要更具体。
+- skin_signals (Array): 具体的生理特征。
+- environment_context (String): 一句话描述环境氛围与光线对情绪的潜在影响。
+- eye_state (String): 专门描述眼神和眼部状态（如"眼神闪躲，略显焦虑"）。
+- deep_reasoning (String): 用一句话合成你的“推理链”。
+- lifestyle_hints (Array): 基于以上所有信息的推测。
+- suggested_questions (Array): 3个基于视觉分析的、直击人心的反思问题（如“你是否在强迫自己假装合群？”）。
+- suggested_plans (Array): 3个非常具体的、5分钟内能完成的恢复能量的小行动（如“去茶水间看窗外发呆3分钟”）。
+- analysis_confidence (0-1): 信心度。
+
+严格输出 JSON 格式，不要包含 markdown 标记。`;
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
 
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=${apiKey}`, {
+        // User explicitly requested gemini-3-pro-preview
+        const model = 'gemini-3-pro-preview';
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -236,7 +257,8 @@ ${historyContext || '(首轮对话)'}
 
 export async function analyzeFaceWithConversation(
     preliminaryAnalysis: GeminiFaceAnalysis,
-    transcript: { role: 'user' | 'assistant'; content: string }[]
+    transcript: { role: 'user' | 'assistant'; content: string }[],
+    pastRecords: any[] = [] // New Argument: History Context
 ): Promise<any> {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
     if (!apiKey) throw new Error("No Gemini API Key provided");
@@ -244,24 +266,39 @@ export async function analyzeFaceWithConversation(
     const analysisContext = JSON.stringify(preliminaryAnalysis);
     const transcriptContext = transcript.map(m => `${m.role}: ${m.content}`).join('\n');
 
+    // Format History Context
+    const historyContext = pastRecords.map(r =>
+        `[${r.dateLabel}]: Energy=${r.emotion.energy_level}, Mood=${r.emotion.mood_brightness}, Tags=${r.emotion.tags.join(',')}, Summary=${r.emotion.summary}`
+    ).join('\n');
+
     const prompt = `
-你是一个专业的"脸部状态分析师"。请结合初步分析结果以及对话内容，生成一份最终的详细报告。
+你是一个专业的"脸部状态分析师"。请结合初步分析结果、对话内容以及**用户的历史状态趋势**，生成一份最终的详细报告。
 
 输入：
 1. 初步分析（基于照片）：${analysisContext}
-2. 对话内容（用户的真实描述，权重最高）：
+2. 历史记录（过去几天的状态，用于分析趋势）：
+${historyContext || "(无历史记录)"}
+3. 对话内容（用户的真实描述，权重最高）：
 ${transcriptContext}
 
 任务：
-综合初步分析和对话内容，输出最终的 JSON 报告。如果用户的主观描述与照片分析不一致，请在 dialog_summary 中体现这种反差或结合。
+综合以上信息，输出最终 JSON。请特别注意：
+1. **纵向分析**：如果能从历史记录中发现趋势（如连续疲劳、情绪突然低落），请在 deep_reasoning 中指出。
+2. **显式归因**：你的建议必须有理有据。
+3. **微行动框架**：suggested_plans 必须使用 **"当[触发场景]时，[具体行动]"** 的格式。
 
 输出字段要求（JSON）：
 - energy_level (0-10)
 - mood_brightness (0-10)
+- emotion_summary: String, **情绪快照**。用简短、有诗意的语言总结当下的状态（如“过度兴奋后的疲惫”、“平静的内耗”）。
+- tags (2-4个标签)
 - tags (2-4个标签)
 - skin_signals (数组)
 - lifestyle_hints (数组)
 - dialog_summary：用 1-2 句话精炼总结用户在对话中透露的核心状态或心事（中文）。
+- deep_reasoning: String, **必须包含对历史趋势的分析**（如果存在），并解释为什么给出下面的建议。
+- suggested_questions: Array<String>, 3个基于对话深度生成的反思问题。
+- suggested_plans: Array<String>, 3个小练习。**严格格式要求："[Trigger] -> [Action]"**。例如："当你感到肩膀酸痛时 -> 做一个扩胸运动"。
 
 请返回 JSON 对象。`;
 

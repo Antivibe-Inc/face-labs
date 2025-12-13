@@ -10,6 +10,7 @@ import type { FaceAnalysisResult } from '../../types/analysis';
 interface ConversationViewProps {
     image: string; // Base64
     preliminaryAnalysis: GeminiFaceAnalysis;
+    pastRecords?: any[]; // Snapshot of past 3 days
     onComplete: (result: FaceAnalysisResult, transcript?: { role: 'user' | 'assistant'; content: string }[]) => void;
     onCancel: () => void;
 }
@@ -17,7 +18,7 @@ interface ConversationViewProps {
 type Message = { role: 'user' | 'assistant'; content: string };
 type DisplayMode = 'ai_speaking' | 'user_speaking' | 'thinking' | 'idle';
 
-export function ConversationView({ image, preliminaryAnalysis, onComplete, onCancel: _ }: ConversationViewProps) {
+export function ConversationView({ image, preliminaryAnalysis, pastRecords = [], onComplete, onCancel: _ }: ConversationViewProps) {
     const [messages, setMessages] = useState<Message[]>([]);
 
     // Core States
@@ -116,11 +117,11 @@ export function ConversationView({ image, preliminaryAnalysis, onComplete, onCan
         setCurrentText("正在整理本次对话...");
 
         try {
-            const rawResult = await analyzeFaceWithConversation(preliminaryAnalysis, messages);
+            const rawResult = await analyzeFaceWithConversation(preliminaryAnalysis, messages, pastRecords);
 
             const fullResult: FaceAnalysisResult = {
                 emotion: {
-                    summary: rawResult.summary || "今日状态总结",
+                    summary: rawResult.emotion_summary || rawResult.summary || "今日状态总结",
                     energy_level: rawResult.energy_level,
                     mood_brightness: rawResult.mood_brightness,
                     tags: rawResult.tags,
@@ -129,11 +130,12 @@ export function ConversationView({ image, preliminaryAnalysis, onComplete, onCan
                 lifestyle: {
                     signals: rawResult.skin_signals || [],
                     suggestions: rawResult.lifestyle_hints || [],
+                    suggested_plans: rawResult.suggested_plans, // Map AI plans
                     disclaimer: "非医疗诊断，仅供参考"
                 },
                 reflection: {
                     summary: rawResult.dialog_summary || "...",
-                    questions: ["今天有什么值得记录的事？"]
+                    questions: rawResult.suggested_questions || ["今天有什么值得记录的事？"] // Map AI questions
                 },
                 timestamp: Date.now(),
                 dialog_summary: rawResult.dialog_summary,
