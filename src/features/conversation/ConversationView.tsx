@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { useSpeechRecognition } from './useSpeechRecognition';
 import { useSoundGen } from '../../hooks/useSoundGen';
 import { generateConversationReply, analyzeFaceWithConversation, type GeminiFaceAnalysis } from '../../services/geminiService';
@@ -200,7 +201,12 @@ export function ConversationView({ image, preliminaryAnalysis, onComplete, onCan
 
 
     return (
-        <div className="fixed inset-0 z-[100] bg-black text-white flex flex-col items-center justify-between overflow-hidden animate-fade-in font-sans">
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black text-white flex flex-col items-center justify-between overflow-hidden font-sans"
+        >
 
             {/* 1. Background Particles */}
             <VoiceParticles mode={particleMode} />
@@ -264,7 +270,9 @@ export function ConversationView({ image, preliminaryAnalysis, onComplete, onCan
                         </>
                     )}
 
-                    <button
+                    <motion.button
+                        whileTap={{ scale: 0.9 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 10 }}
                         onPointerDown={handlePointerDown}
                         onPointerUp={handlePointerUp}
                         onPointerCancel={handlePointerCancel}
@@ -272,11 +280,11 @@ export function ConversationView({ image, preliminaryAnalysis, onComplete, onCan
                         onContextMenu={(e) => e.preventDefault()}
                         disabled={displayMode === 'thinking' || displayMode === 'ai_speaking'}
                         style={{ touchAction: 'none' }} // Critical for preventing scroll/zoom while holding
-                        className={`relative w-24 h-24 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.1)] transition-all duration-300 select-none ${isRecording
-                            ? 'bg-cyan-600 scale-110 shadow-[0_0_50px_rgba(8,145,178,0.5)]'
+                        className={`relative w-24 h-24 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.1)] select-none ${isRecording
+                            ? 'bg-cyan-600 shadow-[0_0_50px_rgba(8,145,178,0.5)]'
                             : displayMode === 'thinking'
                                 ? 'bg-neutral-800 border-2 border-neutral-700 opacity-50 cursor-not-allowed'
-                                : 'bg-white/10 border border-white/20 hover:bg-white/20 hover:scale-105 active:scale-95'
+                                : 'bg-white/10 border border-white/20 hover:bg-white/20'
                             }`}
                     >
                         {isRecording ? (
@@ -292,14 +300,14 @@ export function ConversationView({ image, preliminaryAnalysis, onComplete, onCan
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                             </svg>
                         )}
-                    </button>
+                    </motion.button>
                 </div>
 
                 <p className="mt-6 text-sm text-white/40 font-light tracking-wider uppercase">
                     {isRecording ? 'Listening...' : displayMode === 'thinking' ? 'Processing...' : 'Hold to Speak'}
                 </p>
             </div>
-        </div>
+        </motion.div>
     );
 }
 

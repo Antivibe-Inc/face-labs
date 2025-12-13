@@ -1,5 +1,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { slideUpVariants } from '../../components/layout/PageTransition';
 import type { FaceHistoryRecord } from '../../services/historyStore';
 import { loadHistory, clearHistory, deleteRecord, updateRecordNote } from '../../services/historyStore';
 import { getWeeklyStats, buildWeeklySummary, type WeeklyStats } from './historyStats';
@@ -90,13 +92,17 @@ export function HistoryView({ onNavigateToToday }: HistoryViewProps) {
 
     return (
         <>
-            {selectedRecord && (
-                <HistoryDetailOverlay
-                    record={selectedRecord}
-                    onClose={() => setSelectedRecord(null)}
-                    onSaveNote={(note) => handleNoteUpdate(selectedRecord.id, note)}
-                />
-            )}
+            {/* Modal Layer */}
+            <AnimatePresence>
+                {selectedRecord && (
+                    <HistoryDetailOverlay
+                        key="overlay"
+                        record={selectedRecord}
+                        onClose={() => setSelectedRecord(null)}
+                        onSaveNote={(note) => handleNoteUpdate(selectedRecord.id, note)}
+                    />
+                )}
+            </AnimatePresence>
 
             {history.length === 0 ? (
                 <div className="px-6 py-20 flex flex-col items-center text-center">
@@ -271,7 +277,12 @@ interface HistoryCardProps {
 
 function HistoryCard({ record, onDelete, onClick }: HistoryCardProps) {
     return (
-        <div
+        <motion.div
+            layout
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+            whileTap={{ scale: 0.98 }}
             onClick={onClick}
             className="bg-white p-3 rounded-2xl border border-border-soft shadow-soft flex items-start gap-4 active:scale-[0.98] transition-transform cursor-pointer relative group"
         >
@@ -333,7 +344,7 @@ function HistoryCard({ record, onDelete, onClick }: HistoryCardProps) {
             >
                 删除
             </button>
-        </div>
+        </motion.div>
     );
 }
 
@@ -359,7 +370,13 @@ export function HistoryDetailOverlay({ record, onClose, onSaveNote }: HistoryDet
     const practices = useMemo(() => pickPracticesForRecord({ emotion: record.emotion }), [record.id]);
 
     return (
-        <div className="fixed inset-0 z-50 bg-gray-50/95 backdrop-blur-sm overflow-y-auto animate-fade-in flex flex-col">
+        <motion.div
+            variants={slideUpVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="fixed inset-0 z-50 bg-gray-50/95 backdrop-blur-sm overflow-y-auto flex flex-col"
+        >
             {/* Header */}
             <div className="sticky top-0 bg-white/90 backdrop-blur border-b border-border-soft px-4 py-3 flex items-center justify-between z-10 shadow-sm">
                 <button
@@ -533,6 +550,6 @@ export function HistoryDetailOverlay({ record, onClose, onSaveNote }: HistoryDet
                     onClose={() => setShowShare(false)}
                 />
             )}
-        </div>
+        </motion.div>
     );
 }

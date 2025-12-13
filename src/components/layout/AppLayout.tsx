@@ -1,5 +1,6 @@
-
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { AnimatePresence } from 'framer-motion';
+import { PageTransition } from './PageTransition';
 import { TimelineView } from '../../features/timeline/TimelineView';
 import { InsightsView } from '../../features/insights/InsightsView';
 import { SettingsView } from '../../features/settings/SettingsView';
@@ -8,22 +9,48 @@ export function AppLayout() {
     // Tabs: 'timeline' | 'insights' | 'settings'
     const [activeTab, setActiveTab] = useState<'timeline' | 'insights' | 'settings'>('timeline');
 
+    // Track navigation direction for slide animation
+    const [direction, setDirection] = useState(0);
+    // We need to keep track of the previous tab to know which way to slide
+    const tabOrder = ['timeline', 'insights', 'settings'];
+    const prevTabRef = useRef(activeTab);
+
+    useEffect(() => {
+        const prevIndex = tabOrder.indexOf(prevTabRef.current);
+        const nextIndex = tabOrder.indexOf(activeTab);
+
+        if (prevIndex < nextIndex) {
+            setDirection(1); // Slide Left (New content enters from right)
+        } else if (prevIndex > nextIndex) {
+            setDirection(-1); // Slide Right (New content enters from left)
+        }
+        prevTabRef.current = activeTab;
+    }, [activeTab]);
+
     return (
         <div className="h-[100dvh] w-full bg-bg-canvas flex flex-col max-w-md mx-auto shadow-2xl overflow-hidden font-sans text-text-main relative">
 
             {/* Main Content Area */}
             <main className="flex-1 overflow-hidden relative">
-                {activeTab === 'timeline' && (
-                    <TimelineView />
-                )}
+                <AnimatePresence initial={false} custom={direction} mode="popLayout">
+                    {activeTab === 'timeline' && (
+                        <PageTransition key="timeline" direction={direction}>
+                            <TimelineView />
+                        </PageTransition>
+                    )}
 
-                {activeTab === 'insights' && (
-                    <InsightsView onNavigateToTimeline={() => setActiveTab('timeline')} />
-                )}
+                    {activeTab === 'insights' && (
+                        <PageTransition key="insights" direction={direction}>
+                            <InsightsView onNavigateToTimeline={() => setActiveTab('timeline')} />
+                        </PageTransition>
+                    )}
 
-                {activeTab === 'settings' && (
-                    <SettingsView />
-                )}
+                    {activeTab === 'settings' && (
+                        <PageTransition key="settings" direction={direction}>
+                            <SettingsView />
+                        </PageTransition>
+                    )}
+                </AnimatePresence>
             </main>
 
             {/* Bottom Navigation */}
