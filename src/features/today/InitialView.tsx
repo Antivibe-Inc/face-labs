@@ -64,10 +64,7 @@ export function InitialView({ onImageSelect, showReminder, onDismissReminder }: 
                     </svg>
                 </div>
 
-                <h2 className="text-2xl font-bold text-text-main mb-2">
-                    观察今天的自己
-                </h2>
-
+                <h2 className="text-2xl font-bold text-slate-500">观照今天的自己</h2>
                 <p className="text-text-subtle mb-8 max-w-xs leading-relaxed">
                     找一个光线柔和的位置，拍一张正脸照片，看看今天的自己是什么状态。 <br />
                 </p>

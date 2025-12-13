@@ -107,7 +107,7 @@ export function TrendChartCard({ history }: AnalyticsProps) {
     }
 
     return (
-        <div className="bg-white rounded-2xl border border-border-soft shadow-sm p-4 mb-4">
+        <div className="bg-white rounded-3xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-6 mb-4">
             <div className="flex items-center justify-between mb-4">
                 <div className="font-semibold text-text-main text-sm">精力与心情趋势</div>
                 <div className="flex bg-gray-100 rounded-lg p-0.5">
@@ -235,7 +235,7 @@ export function TagStatsCard({ history }: AnalyticsProps) {
     }
 
     return (
-        <div className="bg-white rounded-2xl border border-border-soft shadow-sm p-4 mb-4">
+        <div className="bg-white rounded-3xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-6 mb-4">
             <h3 className="text-sm font-semibold text-text-main mb-1">最近常见的情绪标签</h3>
             <p className="text-[10px] text-text-subtle mb-4">统计范围：最近 30 天的记录</p>
 

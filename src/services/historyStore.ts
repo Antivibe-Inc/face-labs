@@ -6,24 +6,14 @@ export interface FaceHistoryRecord {
     date: string;       // ISO string
     dateLabel: string;  // e.g. "2025年12月10日"
     thumbnail: string;  // data URL or blob URL (persisted as string)
-    emotion: {
-        summary: string;
-        energy_level: number;
-        mood_brightness: number;
-        tags: string[];
-    };
-    lifestyle: {
-        signals: string[];
-        suggestions: string[];
-    };
-    reflection: {
-        summary: string;
-        questions: string[];
-    };
+    emotion: import('../types/analysis').EmotionData;
+    lifestyle: import('../types/analysis').LifestyleData;
+    reflection: import('../types/analysis').ReflectionData;
     note?: string;      // User-written note
     // Conversation History
     conversationTranscript?: { role: 'user' | 'assistant'; content: string }[];
     dialogSummary?: string;
+    deep_reasoning?: string; // Persist reasoning
 }
 
 const STORAGE_KEY = 'faceLabs_history';
@@ -138,10 +128,13 @@ export function createRecordFromAnalysis(
             energy_level: analysis.emotion.energy_level,
             mood_brightness: analysis.emotion.mood_brightness,
             tags: analysis.emotion.tags,
+            today_suggestion: analysis.emotion.today_suggestion || "",
         },
         lifestyle: {
             signals: analysis.lifestyle.signals,
             suggestions: analysis.lifestyle.suggestions,
+            disclaimer: "非医疗诊断，仅供参考",
+            suggested_plans: analysis.lifestyle.suggested_plans,
         },
         reflection: {
             summary: analysis.reflection.summary,
@@ -149,6 +142,7 @@ export function createRecordFromAnalysis(
         },
         // Conversation (optional)
         dialogSummary: analysis.dialog_summary,
+        deep_reasoning: analysis.deep_reasoning, // Save reasoning
         // Transcript passed separately or attached to analysis? 
         // For now, let's assume we pass it in if available, or it's not in the base create function yet.
         // Logic will be handled in caller usually, but let's allow it to be injected if we update signature.

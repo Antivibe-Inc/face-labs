@@ -29,8 +29,8 @@ export function InsightsView({ onNavigateToTimeline }: InsightsViewProps) {
         <div className="p-4 pb-24 space-y-4 animate-fade-in h-full overflow-y-auto no-scrollbar">
             {/* Header */}
             <div className="flex flex-col items-center text-center">
-                <h2 className="text-xl font-bold text-text-main">最近一段时间的你</h2>
-                <p className="text-xs text-text-subtle mt-0.5">从脸卡中整理出的趋势和小提示</p>
+                <h1 className="text-2xl font-bold text-text-main tracking-tight">洞察</h1>
+                <p className="text-xs text-text-subtle mt-0.5">从时间线中整理出的趋势和小提示</p>
             </div>
 
             {/* A. Weekly Overview */}
@@ -53,7 +53,7 @@ export function InsightsView({ onNavigateToTimeline }: InsightsViewProps) {
                             🕰️
                         </div>
                         <div>
-                            <div className="text-sm font-semibold text-text-main">脸卡时间线</div>
+                            <div className="text-sm font-semibold text-text-main">时间线</div>
                             <div className="text-[10px] text-text-subtle">想翻具体某一天？前往查看详细记录。</div>
                         </div>
                     </div>
@@ -65,7 +65,7 @@ export function InsightsView({ onNavigateToTimeline }: InsightsViewProps) {
 
             {/* E. Placeholder */}
             <div className="border border-dashed border-gray-300 rounded-2xl p-6 text-center">
-                <div className="text-sm font-medium text-text-subtle mb-1">更多脸部洞察</div>
+                <div className="text-sm font-medium text-text-subtle mb-1">更多洞察</div>
                 <div className="text-xs text-gray-400">后续会在这里加入更多基于历史记录的分析与小结。</div>
             </div>
         </div>

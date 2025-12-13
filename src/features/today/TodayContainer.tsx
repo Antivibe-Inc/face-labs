@@ -3,10 +3,10 @@ import { InitialView } from './InitialView';
 import { AnalyzingView } from './AnalyzingView';
 import { ReportView } from './ReportView';
 import { ConversationView } from '../conversation/ConversationView';
-import { callGeminiAnalysis, mapGeminiToAppResult, type GeminiFaceAnalysis } from '../../services/geminiService';
+import { callGeminiAnalysis, type GeminiFaceAnalysis } from '../../services/geminiService';
 // import { analyzeFaceMock } from '../../services/mockFaceAnalysis';
 import type { FaceAnalysisResult } from '../../types/analysis';
-import { createRecordFromAnalysis, saveRecord, loadHistory } from '../../services/historyStore';
+import { loadHistory } from '../../services/historyStore';
 import { loadSettings } from '../../services/settingsStore';
 
 

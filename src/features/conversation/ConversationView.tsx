@@ -139,7 +139,8 @@ export function ConversationView({ image, preliminaryAnalysis, pastRecords = [],
                 },
                 timestamp: Date.now(),
                 dialog_summary: rawResult.dialog_summary,
-                analysis_confidence: 0.9
+                analysis_confidence: 0.9,
+                deep_reasoning: rawResult.deep_reasoning || rawResult.reasoning || "AI 正在整合多模态信息，请查收今日状态报告。",
             };
 
             onComplete(fullResult, messages);

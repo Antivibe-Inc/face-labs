@@ -36,11 +36,12 @@ export function ShareCard({ record, id }: ShareCardProps) {
             </div>
 
             {/* Photo */}
-            <div className="w-full aspect-square rounded-[24px] overflow-hidden shadow-inner border border-white/50 mb-5 relative z-10 bg-white">
+            <div className="w-full aspect-[4/3] rounded-[24px] overflow-hidden shadow-inner border border-white/50 mb-5 relative z-10 bg-white">
                 <img
                     src={thumbnail}
                     alt="Face"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover transform-gpu"
+                    style={{ objectPosition: 'center' }}
                 />
             </div>
 

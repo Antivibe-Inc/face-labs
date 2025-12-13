@@ -30,10 +30,10 @@ function EntryCard({ onTakePhoto, isAnalyzing, isActive }: EntryCardProps) {
             </div>
 
             <h2 className="text-2xl font-bold text-primary mb-3 text-center">
-                观察今天的自己
+                观照今天的自己
             </h2>
             <p className="text-sm text-text-subtle text-center leading-relaxed mb-10 max-w-xs">
-                今天先看一眼自己的脸。<br />
+                即便再忙，也要停下来，<br />
                 拍一张现在的样子，看看它想提醒你什么。
             </p>
 
@@ -361,9 +361,9 @@ export function TimelineView() {
         <div className="relative w-full h-full flex flex-col bg-gray-50">
             {/* Header */}
             <div className="pt-4 pb-2 px-6 flex flex-col items-center text-center">
-                <h1 className="text-xl font-bold text-text-main">脸卡时间线</h1>
+                <h1 className="text-2xl font-bold text-text-main tracking-tight">时间线</h1>
                 <p className="text-xs text-text-subtle mt-0.5 flex items-center gap-2">
-                    <span>用一张脸，记录每一天的自己</span>
+                    <span>用一张脸，观照每一天的自己</span>
                     <span className="w-1 h-1 rounded-full bg-gray-300"></span>
                     <span>已留下 {history.length} 张卡片</span>
                 </p>
@@ -477,7 +477,7 @@ export function TimelineView() {
                                 ⏰
                             </div>
                             <div className="flex-1">
-                                <h3 className="text-sm font-bold text-text-main mb-1">该和今天的脸打个招呼了</h3>
+                                <h3 className="text-2xl font-bold text-slate-500 mb-2">观照今天的自己</h3>
                                 <p className="text-xs text-text-subtle leading-relaxed mb-3">
                                     现在是观察自己的好时间。
                                 </p>

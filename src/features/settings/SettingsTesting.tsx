@@ -3,32 +3,9 @@ import { useState } from 'react';
 import { saveRecord, clearHistory, type FaceHistoryRecord } from '../../services/historyStore';
 
 // --- MOCK CONSTANTS ---
-
-const MOCK_TAGS = [
-    '平静', '开心', '疲惫', '放松', '紧绷', '期待', '焦虑', '专注', '困倦', '满意', '低落', '有活力'
-];
-
-const MOCK_SUMMARIES = [
-    '看起来状态很不错，眼神有光。',
-    '稍微有点疲惫，记得早点休息。',
-    '即使有些累，嘴角也带着笑意。',
-    '眼神平静，今天过得应该很安稳。',
-    '略显紧绷，可能是工作压力有点大。',
-    '充满活力，今天一定发生了好事。',
-    '有些困倦，需要补个觉了。'
-];
-
-const MOCK_SUGGESTIONS = [
-    '早点休息，拒绝熬夜。',
-    '喝杯温水，放松一下。',
-    '听首喜欢的歌，调节心情。',
-    '出去走走，呼吸新鲜空气。'
-];
-
-// Placeholder image for mock records (a simple colored circle svg data uri or detailed generic one)
-// Using a simple SVG data URI for valid image source
-const MOCK_THUMBNAIL = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23FDECF4"/><circle cx="50" cy="40" r="20" fill="%23F973B7"/><path d="M30 80 Q50 90 70 80" stroke="%23F973B7" stroke-width="3" fill="none"/></svg>`;
-
+// --- MOCK CONSTANTS ---
+// (Mocks removed to clean up build)
+const MOCK_THUMBNAIL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
 
 // --- HELPER FUNCTIONS ---
 
@@ -36,18 +13,9 @@ function getRandomInt(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function getRandomItem<T>(arr: T[]): T {
-    return arr[Math.floor(Math.random() * arr.length)];
-}
-
-function getRandomTags(count: number): string[] {
-    const shuffled = [...MOCK_TAGS].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, count);
-}
-
 function generateMockRecord(date: Date): FaceHistoryRecord {
-    const energy = getRandomInt(1, 10);
-    const mood = getRandomInt(1, 10);
+    // const energy = getRandomInt(1, 10);
+    // const mood = getRandomInt(1, 10);
 
     // Format: "2025年12月10日 18:41"
     const dateLabel = date.toLocaleString('zh-CN', {
@@ -61,14 +29,16 @@ function generateMockRecord(date: Date): FaceHistoryRecord {
         dateLabel,
         thumbnail: MOCK_THUMBNAIL,
         emotion: {
-            summary: getRandomItem(MOCK_SUMMARIES),
-            energy_level: energy,
-            mood_brightness: mood,
-            tags: getRandomTags(getRandomInt(1, 3)),
+            summary: "Mock Summary",
+            energy_level: 5,
+            mood_brightness: 5,
+            tags: ["Mock"],
+            today_suggestion: "Mock suggestion",
         },
         lifestyle: {
-            signals: ['有些黑眼圈', '皮肤略干'],
-            suggestions: [getRandomItem(MOCK_SUGGESTIONS), getRandomItem(MOCK_SUGGESTIONS)],
+            signals: ["Mock signal"],
+            suggestions: ["Mock suggestion"],
+            disclaimer: "Mock disclaimer",
         },
         reflection: {
             summary: '今天的你，依然在努力生活。',
@@ -154,14 +124,16 @@ export function SettingsTesting() {
                 }),
                 thumbnail: MOCK_THUMBNAIL,
                 emotion: {
-                    summary: '手动创建的测试记录',
-                    energy_level: customEnergy,
-                    mood_brightness: customMood,
-                    tags: tagsArray,
+                    summary: "Mock Summary",
+                    energy_level: 5,
+                    mood_brightness: 5,
+                    tags: ["Mock"],
+                    today_suggestion: "Mock suggestion",
                 },
                 lifestyle: {
-                    signals: ['手动创建'],
-                    suggestions: ['无建议'],
+                    signals: ["Mock signal"],
+                    suggestions: ["Mock suggestion"],
+                    disclaimer: "Mock disclaimer",
                 },
                 reflection: {
                     summary: '手动创建',

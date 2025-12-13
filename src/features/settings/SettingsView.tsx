@@ -39,7 +39,7 @@ export function SettingsView() {
         <div className="p-4 pb-24 space-y-6 h-full flex flex-col">
             {/* Header */}
             <div className="flex flex-col items-center text-center flex-shrink-0">
-                <h2 className="text-xl font-bold text-text-main">设置</h2>
+                <h1 className="text-2xl font-bold text-text-main tracking-tight">设置</h1>
                 <p className="text-xs text-text-subtle mt-0.5">在这里设置你的使用习惯</p>
             </div>
 

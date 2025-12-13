@@ -23,8 +23,16 @@ export function ShareModal({ record, onClose }: ShareModalProps) {
 
             const canvas = await html2canvas(cardRef.current, {
                 useCORS: true,
-                scale: 2, // Retina quality
-                backgroundColor: null, // Transparent wrapper, but card has bg
+                scale: 3, // Higher quality
+                backgroundColor: null,
+                logging: false,
+                onclone: (clonedDoc) => {
+                    // Ensure fonts are loaded in the clone if possible, or just helps with style stability
+                    const clonedElement = clonedDoc.getElementById('share-card-content');
+                    if (clonedElement) {
+                        // Force specific styles if needed
+                    }
+                }
             });
 
             // Create download link
@@ -45,7 +53,7 @@ export function ShareModal({ record, onClose }: ShareModalProps) {
     };
 
     return createPortal(
-        <div className="fixed inset-0 z-[70] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in safe-area-inset-bottom">
+        <div className="fixed inset-0 z-[110] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in safe-area-inset-bottom">
             <div className="w-full max-w-sm flex flex-col items-center gap-6 animate-in zoom-in-95 duration-200">
 
                 {/* Preview Wrapper */}

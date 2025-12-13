@@ -6,13 +6,13 @@ export interface EmotionData {
     today_suggestion: string;
     // AI Dynamic Suggestions
     suggested_questions?: string[];
-    suggested_plans?: string[];
 }
 
 export interface LifestyleData {
     signals: string[];
     suggestions: string[];
     disclaimer: string;
+    suggested_plans?: string[]; // AI Generated Action Plans
 }
 
 export interface ReflectionData {
@@ -29,6 +29,7 @@ export interface FaceAnalysisResult {
     // Optional fields from real AI analysis
     analysis_confidence?: number;
     warnings?: string[];
+    deep_reasoning?: string; // AI Reasoning Chain
     // Conversation data
     dialog_summary?: string;
 }
