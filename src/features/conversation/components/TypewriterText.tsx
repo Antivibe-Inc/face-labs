@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useSoundGen } from '../../../hooks/useSoundGen';
 
 interface TypewriterTextProps {
     text: string;
@@ -11,6 +12,7 @@ export function TypewriterText({ text, speed = 50, onComplete }: TypewriterTextP
     const indexRef = useRef(0);
     const textRef = useRef(text); // Track prop changes
     const timerRef = useRef<number | null>(null);
+    const { playTypingSound } = useSoundGen();
 
     useEffect(() => {
         // Reset if text prop actually changes to something new
@@ -42,6 +44,12 @@ export function TypewriterText({ text, speed = 50, onComplete }: TypewriterTextP
 
             indexRef.current = nextIndex;
             setDisplayedText(text.slice(0, nextIndex));
+            // Play sound for each character
+            try {
+                playTypingSound();
+            } catch (e) {
+                // Ignore audio errors
+            }
         }, speed);
 
         return () => {

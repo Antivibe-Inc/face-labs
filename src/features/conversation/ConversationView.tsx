@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSpeechRecognition } from './useSpeechRecognition';
+import { useSoundGen } from '../../hooks/useSoundGen';
 import { generateConversationReply, analyzeFaceWithConversation, type GeminiFaceAnalysis } from '../../services/geminiService';
 import { VoiceParticles } from './components/VoiceParticles';
 import { TypewriterText } from './components/TypewriterText';
@@ -27,6 +28,10 @@ export function ConversationView({ image, preliminaryAnalysis, onComplete, onCan
     // STT Hook
     const { isRecording, transcript, error: speechError, startRecording, stopRecording, isSupported } = useSpeechRecognition();
     const hasInitialized = useRef(false);
+
+    // Sound Hook
+    const { playModeSwitch, playClick } = useSoundGen();
+    const prevParticleMode = useRef(particleMode);
 
     // Initial AI Message (Round 0)
     useEffect(() => {
@@ -56,6 +61,18 @@ export function ConversationView({ image, preliminaryAnalysis, onComplete, onCan
             setParticleMode('idle');
         }
     }, [isRecording, transcript, displayMode, currentText]);
+
+    // Sound Effect: Mode Switch
+    useEffect(() => {
+        if (prevParticleMode.current !== particleMode) {
+            try {
+                playModeSwitch(prevParticleMode.current, particleMode);
+            } catch (e) {
+                console.warn("Sound play failed", e);
+            }
+            prevParticleMode.current = particleMode;
+        }
+    }, [particleMode, playModeSwitch]);
 
 
     const startTurn = async (history: Message[]) => {
@@ -160,6 +177,11 @@ export function ConversationView({ image, preliminaryAnalysis, onComplete, onCan
         console.log("[Pointer] Starting recording...");
 
         if (!isRecording) {
+            try {
+                playClick(); // Feedback sound
+            } catch (e) {
+                console.warn("Sound play failed", e);
+            }
             startRecording();
         }
     };
