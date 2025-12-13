@@ -151,7 +151,6 @@ export function VoiceParticles({ mode }: VoiceParticlesProps) {
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
             const activeCenterY = canvas.height * 0.35; // Higher center for listening/speaking/thinking
             const currentMode = modeRef.current;
 
