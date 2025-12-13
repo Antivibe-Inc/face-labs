@@ -173,7 +173,7 @@ export function ReportView({ result, image, onRetake, onSaveNote }: ReportViewPr
                         <PracticeCheckbox
                             key={idx}
                             text={practice}
-                            onToggle={(checked) => {
+                            onToggle={() => {
                                 // Optional: Track usage, but for now local state in component is enough
                             }}
                         />
