@@ -290,7 +290,8 @@ export function TimelineView() {
         } catch (error) {
             console.error("Preliminary analysis failed", error);
             setIsAnalyzing(false);
-            alert("分析服务暂不可用，已直接保存照片。");
+            // Show actual error for debugging
+            alert(`服务不可用: ${error instanceof Error ? error.message : "未知错误"}`);
 
             // Fallback: Skip conversation
             if (currentImage) {

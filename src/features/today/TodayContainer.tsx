@@ -70,6 +70,7 @@ export function TodayContainer() {
                 // Note: We don't save record yet. We wait for conversation to finish.
             } catch (error) {
                 console.error("Analysis failed:", error);
+                alert(`Face Analysis Failed: ${error instanceof Error ? error.message : "Undefined Error"}`);
                 setStep('initial');
             }
         };
