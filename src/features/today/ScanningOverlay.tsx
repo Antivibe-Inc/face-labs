@@ -23,45 +23,58 @@ export function ScanningOverlay({ image }: ScanningOverlayProps) {
 
     useEffect(() => {
         let stepIndex = 0;
-        const totalDuration = 8000; // Increased duration to 8s to match typical API latency
+        // Asymptotic approach: approaches 99% but slows down significantly
+        // Target roughly 30-40s for Gemni 3 Pro Preview
+        const timeConstant = 12000; // Time to reach ~63%
         const startTime = Date.now();
 
         const animInterval = setInterval(() => {
             const elapsed = Date.now() - startTime;
-            // Cap internal calculation slightly lower to avoid rounding to 100 too early
-            let progress = Math.min((elapsed / totalDuration) * 100, 98);
 
-            // If we've reached the cap, creep very slowly
-            if (progress >= 98) {
-                // Determine if we should show the waiting message
-                // We do this if we have already shown the last real step
+            // Formula: fraction = 1 - e^(-t/timeConstant)
+            // This ensures it never hits 100% and slows down smoothly
+            let calculatedProgress = 99 * (1 - Math.exp(-elapsed / timeConstant));
 
-                // Allow state to creep up to 99, but never 100
-                setScanProgress(prev => Math.min(prev + 0.02, 99.0));
+            // Ensure we at least move a tiny bit to feel "alive"
+            if (calculatedProgress > 98.5) {
+                calculatedProgress = 98.5 + (elapsed % 1000) / 2000; // Tiny subtle breathing at the end
+            }
 
+            setScanProgress(calculatedProgress);
+
+            // Determine which step text to show based on progress
+            // Map 0-80% to the first N-1 steps, keep the last step for the final "wait" phase
+            // We have 8 steps. Let's spread them out.
+            // Say we want to show steps 0-6 from 0% to 80% progress
+            // And step 7 ("生成初步诊断...") from 80% to 99%
+
+            const totalSteps = analysisSteps.length;
+            let currentStepIndex = 0;
+
+            if (calculatedProgress < 80) {
+                currentStepIndex = Math.floor((calculatedProgress / 80) * (totalSteps - 1));
+            } else {
+                currentStepIndex = totalSteps - 1;
+            }
+
+            // Special case: After ~23s (85% progress), show the encouragement message
+            if (calculatedProgress > 85) {
                 setMetrics(prev => {
                     if (prev[0] === "接下来跟AI心理师聊几句吧...") return prev;
-                    // Only add if we've already shown the last analysis step
-                    if (prev[0] === analysisSteps[analysisSteps.length - 1]) {
-                        return ["接下来跟AI心理师聊几句吧...", ...prev].slice(0, 4);
-                    }
-                    return prev;
+                    return ["接下来跟AI心理师聊几句吧...", ...prev].slice(0, 4);
                 });
-            } else {
-                setScanProgress(progress);
+            }
 
-                // Determine which step text to show based on progress
-                // We map 0-98% to the step indices
-                const currentStepIndex = Math.floor((progress / 98) * analysisSteps.length);
-
-                if (currentStepIndex < analysisSteps.length && currentStepIndex >= stepIndex) {
-                    if (currentStepIndex > stepIndex || stepIndex === 0) {
-                        setMetrics(prev => {
-                            if (prev[0] === analysisSteps[currentStepIndex]) return prev;
-                            return [analysisSteps[currentStepIndex], ...prev].slice(0, 4);
-                        });
-                        stepIndex = currentStepIndex;
-                    }
+            // Update metrics log if step changes
+            if (currentStepIndex < totalSteps && currentStepIndex >= stepIndex) {
+                if (currentStepIndex > stepIndex || stepIndex === 0) {
+                    setMetrics(prev => {
+                        // Avoid duplicates
+                        if (prev[0] === analysisSteps[currentStepIndex]) return prev;
+                        // Keep distinct messages
+                        return [analysisSteps[currentStepIndex], ...prev].slice(0, 4);
+                    });
+                    stepIndex = currentStepIndex;
                 }
             }
         }, 50);
