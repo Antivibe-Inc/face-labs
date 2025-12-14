@@ -162,7 +162,7 @@ export async function callGeminiAnalysis(image: File | string): Promise<GeminiFa
 严格输出 JSON 格式，不要包含 markdown 标记。`;
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+    const timeoutId = setTimeout(() => controller.abort(), 120000); // 120s timeout
 
     try {
         // User explicitly requested gemini-3-pro-preview
