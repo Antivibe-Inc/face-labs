@@ -41,12 +41,62 @@ export function mapGeminiToAppResult(gemini: GeminiFaceAnalysis): any {
     };
 }
 
-export async function callGeminiAnalysis(image: File | string): Promise<GeminiFaceAnalysis> {
+/**
+ * Universal fetcher for Gemini API.
+ * 
+ * Logic:
+ * 1. If VITE_GEMINI_API_KEY is present (Local Dev), call Google directly.
+ * 2. If VITE_GEMINI_API_KEY is missing (Production), call our own Serverless Proxy (/api/gemini).
+ */
+async function fetchGemini(model: string, contents: any[], signal?: AbortSignal): Promise<any> {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    if (!apiKey) {
-        throw new Error("No Gemini API Key provided");
-    }
 
+    if (apiKey) {
+        // --- Local Dev / Direct Access ---
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ contents }),
+            signal
+        });
+
+        if (!response.ok) {
+            const errorBody = await response.text();
+            throw new Error(`Gemini API Error: ${response.status} ${response.statusText} - ${errorBody}`);
+        }
+        return await response.json();
+
+    } else {
+        // --- Production / Proxy Access ---
+        const response = await fetch(`/api/gemini`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model,
+                contents
+            }),
+            signal
+        });
+
+        if (!response.ok) {
+            const errorBody = await response.text();
+            // Try to parse JSON error if possible
+            try {
+                const jsonErr = JSON.parse(errorBody);
+                throw new Error(jsonErr.error || "Proxy API Error");
+            } catch (e) {
+                throw new Error(`Proxy API Error: ${response.status} ${response.statusText}`);
+            }
+        }
+        return await response.json();
+    }
+}
+
+export async function callGeminiAnalysis(image: File | string): Promise<GeminiFaceAnalysis> {
     // Convert image to Base64
     const base64Image = await new Promise<string>((resolve, reject) => {
         if (typeof image === 'string') {
@@ -117,31 +167,18 @@ export async function callGeminiAnalysis(image: File | string): Promise<GeminiFa
     try {
         // User explicitly requested gemini-3-pro-preview
         const model = 'gemini-3-pro-preview';
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                contents: [{
-                    parts: [
-                        { text: prompt },
-                        { inline_data: { mime_type: "image/jpeg", data: base64Image } }
-                    ]
-                }]
-            }),
-            signal: controller.signal
-        });
+
+        const contents = [{
+            parts: [
+                { text: prompt },
+                { inline_data: { mime_type: "image/jpeg", data: base64Image } }
+            ]
+        }];
+
+        const data = await fetchGemini(model, contents, controller.signal);
 
         clearTimeout(timeoutId);
 
-        if (!response.ok) {
-            const errorBody = await response.text();
-            console.error("Gemini API Error Body:", errorBody);
-            throw new Error(`Gemini API Error: ${response.status} ${response.statusText} - ${errorBody}`);
-        }
-
-        const data = await response.json();
         const textOutput = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
         if (!textOutput) {
@@ -177,8 +214,6 @@ export async function generateConversationReply(
     preliminaryAnalysis: GeminiFaceAnalysis,
     history: { role: 'user' | 'assistant'; content: string }[]
 ): Promise<ConversationReply> {
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    if (!apiKey) throw new Error("No Gemini API Key provided");
 
     const analysisContext = JSON.stringify(preliminaryAnalysis);
     const historyContext = history.map(m => `${m.role}: ${m.content}`).join('\n');
@@ -231,19 +266,11 @@ ${historyContext || '(首轮对话)'}
     const model = 'gemini-2.0-flash';
 
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts }]
-            }),
-            signal: controller.signal
-        });
+        const contents = [{ parts }];
+        const data = await fetchGemini(model, contents, controller.signal);
 
         clearTimeout(timeoutId);
 
-        if (!response.ok) throw new Error("Conversation API failed");
-        const data = await response.json();
         const textOutput = data.candidates?.[0]?.content?.parts?.[0]?.text;
         if (!textOutput) throw new Error("No output from Gemini");
 
@@ -260,8 +287,6 @@ export async function analyzeFaceWithConversation(
     transcript: { role: 'user' | 'assistant'; content: string }[],
     pastRecords: any[] = [] // New Argument: History Context
 ): Promise<any> {
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    if (!apiKey) throw new Error("No Gemini API Key provided");
 
     const analysisContext = JSON.stringify(preliminaryAnalysis);
     const transcriptContext = transcript.map(m => `${m.role}: ${m.content}`).join('\n');
@@ -306,22 +331,14 @@ ${transcriptContext}
     const timeoutId = setTimeout(() => controller.abort(), 30000);
 
     try {
-        // 不需要再发送图片，使用更快的模型
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{
-                    parts: [{ text: prompt }]
-                }]
-            }),
-            signal: controller.signal
-        });
+        const contents = [{
+            parts: [{ text: prompt }]
+        }];
+
+        const data = await fetchGemini('gemini-2.0-flash', contents, controller.signal);
 
         clearTimeout(timeoutId);
 
-        if (!response.ok) throw new Error("Final Analysis API failed");
-        const data = await response.json();
         const textOutput = data.candidates?.[0]?.content?.parts?.[0]?.text;
         const cleanJson = textOutput.replace(/```json/g, '').replace(/```/g, '').trim();
         return JSON.parse(cleanJson);
