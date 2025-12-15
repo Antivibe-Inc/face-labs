@@ -128,6 +128,9 @@ export function createRecordFromAnalysis(
             energy_level: analysis.emotion.energy_level,
             mood_brightness: analysis.emotion.mood_brightness,
             tags: analysis.emotion.tags,
+            stress_level: analysis.emotion.stress_level || 0,
+            fatigue_level: analysis.emotion.fatigue_level || 0,
+            sleepiness_level: analysis.emotion.sleepiness_level || 0,
             today_suggestion: analysis.emotion.today_suggestion || "",
         },
         lifestyle: {

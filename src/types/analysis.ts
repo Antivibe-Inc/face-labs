@@ -2,6 +2,9 @@ export interface EmotionData {
     summary: string;
     energy_level: number; // 0-10
     mood_brightness: number; // 0-10
+    stress_level?: number; // 0-10 (New)
+    fatigue_level?: number; // 0-10 (New)
+    sleepiness_level?: number; // 0-10 (New: based on eye bags, puffiness)
     tags: string[]; // 1-4 short strings
     today_suggestion: string;
     // AI Dynamic Suggestions

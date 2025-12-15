@@ -5,7 +5,7 @@ import { slideUpVariants } from '../../components/layout/PageTransition';
 import type { FaceHistoryRecord } from '../../services/historyStore';
 import { loadHistory, clearHistory, deleteRecord, updateRecordNote } from '../../services/historyStore';
 import { getWeeklyStats, buildWeeklySummary, type WeeklyStats } from './historyStats';
-import { TrendChartCard, TagStatsCard } from './HistoryAnalytics';
+import { TrendChartCard, TagStatsCard, WeeklyRhythmCard, PhysiologicalStatsCard } from './HistoryAnalytics';
 import { pickQuestionsForRecord, pickPracticesForRecord } from '../../services/suggestionService';
 import { PracticeCheckbox } from '../../components/ui/PracticeCheckbox';
 import { ShareModal } from '../share/ShareModal';
@@ -33,6 +33,10 @@ export function HistoryView({ onNavigateToToday }: HistoryViewProps) {
             setHistory([]);
         }
     };
+    // ... (omitting lines for brevity in replace_file_content, will focus on just the necessary parts if I can range it better)
+    // Actually I need to replace the import at the top and the usage in the middle.
+    // Using multi_replace_file_content is better for this.
+
 
     const handleDeleteRecord = (id: string, e: React.MouseEvent) => {
         e.stopPropagation(); // Prevent opening detail view
@@ -138,15 +142,15 @@ export function HistoryView({ onNavigateToToday }: HistoryViewProps) {
                     </div>
 
                     {/* Analytics Section */}
-                    {history.length >= 2 && (
+                    {/* Analytics Section */}
+                    {history.length > 0 && (
                         <div className="animate-fade-in">
                             <WeeklyOverviewCard stats={weeklyStats} />
-                            <TrendChartCard history={history} />
+                            {history.length >= 2 && <TrendChartCard history={history} />}
+                            <PhysiologicalStatsCard history={history} />
+                            {history.length >= 3 && <WeeklyRhythmCard history={history} />}
                             <TagStatsCard history={history} />
                         </div>
-                    )}
-                    {history.length < 2 && (
-                        <WeeklyOverviewCard stats={weeklyStats} />
                     )}
 
                     {/* Filters */}
@@ -465,6 +469,22 @@ export function HistoryDetailOverlay({ record, onClose, onSaveNote }: HistoryDet
                         <HistoryScoreCard label="精力值" value={record.emotion.energy_level} />
                         <HistoryScoreCard label="心情亮度" value={record.emotion.mood_brightness} />
                     </div>
+
+                    {/* Physiological Load Section - Compact Mode (REMOVED) */}
+
+                </section>
+
+                {/* 1.5 Physiological Load - Standalone Card */}
+                <section className="bg-white p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100">
+                    <div className="flex items-center gap-2 mb-4">
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                        <h3 className="text-sm font-bold text-text-subtle tracking-widest">生理负荷</h3>
+                    </div>
+                    <div className="grid grid-cols-3 gap-3">
+                        <PhysioMiniCard label="压力值" value={record.emotion.stress_level || 0} color="bg-rose-50 text-rose-600" />
+                        <PhysioMiniCard label="疲劳度" value={record.emotion.fatigue_level || 0} color="bg-amber-50 text-amber-600" />
+                        <PhysioMiniCard label="困倦感" value={record.emotion.sleepiness_level || 0} color="bg-blue-50 text-blue-600" />
+                    </div>
                 </section>
 
                 {/* 2. Lifestyle */}
@@ -611,6 +631,15 @@ function HistoryScoreCard({ label, value }: { label: string; value: number }) {
                     className={`h-full rounded-full shadow-sm transition-all duration-1000 ease-out ${value > 7 ? 'bg-gradient-to-r from-green-400 to-emerald-500' : value > 4 ? 'bg-gradient-to-r from-yellow-400 to-orange-400' : 'bg-gradient-to-r from-gray-400 to-gray-500'}`}
                 />
             </div>
+        </div>
+    );
+}
+
+function PhysioMiniCard({ label, value, color }: { label: string; value: number; color: string }) {
+    return (
+        <div className={`p-3 rounded-2xl flex flex-col items-center justify-center ${color.split(' ')[0]} border border-transparent`}>
+            <div className={`text-xl font-bold ${color.split(' ')[1]} mb-1`}>{value.toFixed(1)}</div>
+            <div className="text-[10px] text-text-subtle/70 font-medium">{label}</div>
         </div>
     );
 }

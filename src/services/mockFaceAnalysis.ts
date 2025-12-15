@@ -12,6 +12,9 @@ export async function analyzeFaceMock(_image: File | string): Promise<FaceAnalys
                 summary: "整体比较平静，但能看出有一点疲惫。",
                 energy_level: 4,
                 mood_brightness: 6,
+                stress_level: 6,
+                fatigue_level: 7,
+                sleepiness_level: 8,
                 tags: ["平静", "略疲惫", "稳重"],
                 today_suggestion: "今天比较适合安静处理一些不太紧急的事情，少安排高冲突的沟通。"
             },
@@ -30,6 +33,9 @@ export async function analyzeFaceMock(_image: File | string): Promise<FaceAnalys
                 summary: "看起来精力还不错，带着一份好奇心。",
                 energy_level: 8,
                 mood_brightness: 8,
+                stress_level: 2,
+                fatigue_level: 3,
+                sleepiness_level: 1,
                 tags: ["有活力", "好奇", "开放"],
                 today_suggestion: "今天可以安排一些需要创造力或沟通的事情，你的状态很棒。"
             },
@@ -48,6 +54,9 @@ export async function analyzeFaceMock(_image: File | string): Promise<FaceAnalys
                 summary: "有些内敛和深思。",
                 energy_level: 3,
                 mood_brightness: 5,
+                stress_level: 7,
+                fatigue_level: 4,
+                sleepiness_level: 4,
                 tags: ["安静", "内向", "思考"],
                 today_suggestion: "今天适合做一些深度思考阅读，或者简单的整理工作。"
             },

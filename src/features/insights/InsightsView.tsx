@@ -4,7 +4,7 @@ import type { FaceHistoryRecord } from '../../services/historyStore';
 import { loadHistory } from '../../services/historyStore';
 import { getWeeklyStats } from '../history/historyStats';
 import { WeeklyOverviewCard } from '../history/HistoryView'; // Assuming export, might need to extract if not exported
-import { TrendChartCard, TagStatsCard } from '../history/HistoryAnalytics';
+import { TrendChartCard, TagStatsCard, WeeklyRhythmCard, PhysiologicalStatsCard } from '../history/HistoryAnalytics';
 
 // We need to ensure WeeklyOverviewCard is exported from HistoryView or moved.
 // For now, I will assume I need to extract it or import it.
@@ -39,10 +39,16 @@ export function InsightsView({ onNavigateToTimeline }: InsightsViewProps) {
             {/* B. Trend Chart */}
             <TrendChartCard history={history} />
 
-            {/* C. Tag Stats */}
+            {/* C. Physiological Stats (New) */}
+            <PhysiologicalStatsCard history={history} />
+
+            {/* D. Weekly Rhythm (New) */}
+            <WeeklyRhythmCard history={history} />
+
+            {/* E. Tag Stats */}
             <TagStatsCard history={history} />
 
-            {/* D. Back to Timeline Link */}
+            {/* F. Back to Timeline Link */}
             {history.length > 0 && (
                 <div
                     onClick={onNavigateToTimeline}

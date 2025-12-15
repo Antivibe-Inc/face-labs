@@ -2,6 +2,9 @@
 export interface GeminiFaceAnalysis {
     energy_level: number;
     mood_brightness: number;
+    stress_level?: number;
+    fatigue_level?: number;
+    sleepiness_level?: number;
     tags: string[];
     skin_signals?: string[];
     lifestyle_hints?: string[];
@@ -23,6 +26,9 @@ export function mapGeminiToAppResult(gemini: GeminiFaceAnalysis): any {
             summary: gemini.deep_reasoning || "AI 正在深度分析中...",
             energy_level: gemini.energy_level,
             mood_brightness: gemini.mood_brightness,
+            stress_level: gemini['stress_level'] || 0, // Fallback for safety
+            fatigue_level: gemini['fatigue_level'] || 0,
+            sleepiness_level: gemini['sleepiness_level'] || 0,
             tags: gemini.tags,
             today_suggestion: gemini.environment_context || "保持当下的状态。"
         },
@@ -149,6 +155,9 @@ export async function callGeminiAnalysis(image: File | string): Promise<GeminiFa
 
 - energy_level (0-10): 综合生理能量。结合眼神光彩和肌肉张力判断。
 - mood_brightness (0-10): 综合情绪亮度。结合环境氛围和微表情判断。
+- stress_level (0-10): 压力值。观察眉间紧绷度、咬肌状态。
+- fatigue_level (0-10): 疲劳度。观察眼神聚焦度、面部肌肉松弛度。
+- sleepiness_level (0-10): 困倦/缺觉指数。重点观察黑眼圈、眼袋、面部浮肿程度。
 - tags (3-5个): 极具画面感的中文短语。如"深夜emo"、"强撑的疲惫"、"松弛感"、"眼神清澈"。相比之前的形容词，要更具体。
 - skin_signals (Array): 具体的生理特征。
 - environment_context (String): 一句话描述环境氛围与光线对情绪的潜在影响。
@@ -221,28 +230,22 @@ export async function generateConversationReply(
     // 判断是否是第一轮对话
     const isFirstTurn = history.length === 0;
 
-    const prompt = `
-角色：你是一个温暖、敏锐的"脸部状态观察助手"。
-任务：基于用户的照片分析结果，与用户自由对话，倾听他们的状态和心事。
+    // 强力系统指令
+    const systemInstruction = `
+你是一个返回纯 JSON 的状态观察助手。
+绝对不要输出任何 markdown 标记、解释文字或开场白。
+严禁输出 "Hello" 或 "Here is the JSON" 之类的废话。
+只输出一个合法的 JSON 对象。
 
 输入信息：
 1. 初步分析结果：${analysisContext}
 2. 对话历史：
 ${historyContext || '(首轮对话)'}
 
-要求：
-1. **引导或跟上节奏**：根据用户的回复，自然地延续对话。可以：
-   - 对用户说的内容表示理解或共鸣
-   - 提出相关的开放式问题，深入了解
-   - 或者就用户关心的话题展开讨论
-2. **不做诊断**：绝对禁止医学或心理学诊断，只描述状态（累、紧绷、放松）。
-3. **简洁自然**：每次回复不超过 50 字，像朋友聊天一样自然。
-4. **永远不要主动结束对话**：isFinal 始终设为 false。用户想结束时会自己点击按钮。
-
-输出格式（JSON）：
+输出格式（严格 JSON）：
 {
-    "observation": "你的回应...",
-    "question": "你的追问或话题延续...",
+    "observation": "你的简短回应（50字内）",
+    "question": "你的温和追问（20字内）",
     "isFinal": false
 }`;
 
@@ -254,15 +257,14 @@ ${historyContext || '(首轮对话)'}
     if (isFirstTurn) {
         const base64Image = image.includes(',') ? image.split(',')[1] : image;
         parts = [
-            { text: prompt },
+            { text: systemInstruction },
             { inline_data: { mime_type: "image/jpeg", data: base64Image } }
         ];
     } else {
-        // 后续轮次只发送文字，使用更快的模型
-        parts = [{ text: prompt }];
+        // 后续轮次只发送文字
+        parts = [{ text: systemInstruction }];
     }
 
-    // 后续轮次使用更快的 flash 模型
     const model = 'gemini-2.0-flash';
 
     try {
@@ -274,11 +276,28 @@ ${historyContext || '(首轮对话)'}
         const textOutput = data.candidates?.[0]?.content?.parts?.[0]?.text;
         if (!textOutput) throw new Error("No output from Gemini");
 
-        const cleanJson = textOutput.replace(/```json/g, '').replace(/```/g, '').trim();
+        // Robust JSON Parsing using Regex
+        // Match everything from the first '{' to the last '}'
+        const jsonMatch = textOutput.match(/\{[\s\S]*\}/);
+
+        let cleanJson = textOutput;
+        if (jsonMatch) {
+            cleanJson = jsonMatch[0];
+        } else {
+            // Fallback: simple cleanup
+            cleanJson = textOutput.replace(/```json/g, '').replace(/```/g, '').trim();
+        }
+
         return JSON.parse(cleanJson) as ConversationReply;
     } catch (error) {
         clearTimeout(timeoutId);
-        throw error;
+        console.error("Gemini Conversation Error:", error);
+        // Fallback response to keep app alive
+        return {
+            observation: "抱歉，我的思维因为网络波动稍微卡了一下。",
+            question: "能再说一遍刚才的话吗？",
+            isFinal: false
+        };
     }
 }
 
@@ -315,8 +334,10 @@ ${transcriptContext}
 输出字段要求（JSON）：
 - energy_level (0-10)
 - mood_brightness (0-10)
+- stress_level (0-10)
+- fatigue_level (0-10)
+- sleepiness_level (0-10)
 - emotion_summary: String, **情绪快照**。用简短、有诗意的语言总结当下的状态（如“过度兴奋后的疲惫”、“平静的内耗”）。
-- tags (2-4个标签)
 - tags (2-4个标签)
 - skin_signals (数组)
 - lifestyle_hints (数组)

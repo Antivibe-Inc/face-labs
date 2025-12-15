@@ -13,6 +13,17 @@ function getRandomInt(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+// Random Tags List
+const MOCK_TAGS_POOL = [
+    "平静", "专注", "疲惫", "焦虑", "兴奋", "期待", "困倦", "放松", "自信", "低落", "压力", "充实", "无聊", "思考"
+];
+
+function getRandomTags() {
+    const count = getRandomInt(1, 3);
+    const shuffled = [...MOCK_TAGS_POOL].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+}
+
 function generateMockRecord(date: Date): FaceHistoryRecord {
     // const energy = getRandomInt(1, 10);
     // const mood = getRandomInt(1, 10);
@@ -30,9 +41,12 @@ function generateMockRecord(date: Date): FaceHistoryRecord {
         thumbnail: MOCK_THUMBNAIL,
         emotion: {
             summary: "Mock Summary",
-            energy_level: 5,
-            mood_brightness: 5,
-            tags: ["Mock"],
+            energy_level: getRandomInt(1, 10),
+            mood_brightness: getRandomInt(1, 10),
+            tags: getRandomTags(),
+            stress_level: getRandomInt(1, 8),
+            fatigue_level: getRandomInt(1, 9),
+            sleepiness_level: getRandomInt(1, 8),
             today_suggestion: "Mock suggestion",
         },
         lifestyle: {
@@ -87,6 +101,10 @@ export function SettingsTesting() {
 
         const now = new Date();
 
+        const firstRecord = generateMockRecord(new Date()); // Generate one just to show structure in alert logic (approx) but better to capture from loop
+
+        let lastRecord: FaceHistoryRecord | null = null;
+
         for (let i = 0; i < days; i++) {
             // Generate 1-2 records per day
             const recordsPerDay = getRandomInt(1, 2);
@@ -99,8 +117,10 @@ export function SettingsTesting() {
 
                 const record = generateMockRecord(d);
                 saveRecord(record, { ignoreDailyLimit: true });
+                lastRecord = record;
             }
         }
+
         showMsg(`已生成 ${days} 天的测试数据。`);
     };
 
@@ -125,9 +145,12 @@ export function SettingsTesting() {
                 thumbnail: MOCK_THUMBNAIL,
                 emotion: {
                     summary: "Mock Summary",
-                    energy_level: 5,
-                    mood_brightness: 5,
-                    tags: ["Mock"],
+                    energy_level: customEnergy,
+                    mood_brightness: customMood,
+                    tags: tagsArray,
+                    stress_level: getRandomInt(1, 9),
+                    fatigue_level: getRandomInt(1, 9),
+                    sleepiness_level: getRandomInt(1, 9),
                     today_suggestion: "Mock suggestion",
                 },
                 lifestyle: {

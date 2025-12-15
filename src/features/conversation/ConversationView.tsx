@@ -124,6 +124,10 @@ export function ConversationView({ image, preliminaryAnalysis, pastRecords = [],
                     summary: rawResult.emotion_summary || rawResult.summary || "今日状态总结",
                     energy_level: rawResult.energy_level,
                     mood_brightness: rawResult.mood_brightness,
+                    // Use Flash result if available, otherwise fallback to Pro (preliminary)
+                    stress_level: rawResult.stress_level || preliminaryAnalysis.stress_level || 0,
+                    fatigue_level: rawResult.fatigue_level || preliminaryAnalysis.fatigue_level || 0,
+                    sleepiness_level: rawResult.sleepiness_level || preliminaryAnalysis.sleepiness_level || 0,
                     tags: rawResult.tags,
                     today_suggestion: rawResult.today_suggestion || "好好休息"
                 },
