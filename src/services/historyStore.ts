@@ -132,6 +132,12 @@ export function createRecordFromAnalysis(
             fatigue_level: analysis.emotion.fatigue_level || 0,
             sleepiness_level: analysis.emotion.sleepiness_level || 0,
             today_suggestion: analysis.emotion.today_suggestion || "",
+            // 5D Metrics (Persist undefined if missing)
+            vitality_score: analysis.emotion.vitality_score,
+            calmness_score: analysis.emotion.calmness_score,
+            focus_score: analysis.emotion.focus_score,
+            approachability_score: analysis.emotion.approachability_score,
+            confidence_score: analysis.emotion.confidence_score,
         },
         lifestyle: {
             signals: analysis.lifestyle.signals,

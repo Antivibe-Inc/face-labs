@@ -31,10 +31,10 @@ export function PracticeCheckbox({ text, onToggle }: PracticeCheckboxProps) {
         <div className="relative">
             <div
                 onClick={handleClick}
-                className={`flex items-start gap-3 bg-gray-50 p-3 rounded-2xl border transition-all duration-300 cursor-pointer active:scale-[0.98] ${checked ? 'border-primary/30 bg-primary/5' : 'border-gray-100 hover:border-gray-200'}`}
+                className={`flex items-center gap-3 bg-gray-50 p-3 rounded-2xl border transition-all duration-300 cursor-pointer active:scale-[0.98] ${checked ? 'border-primary/30 bg-primary/5' : 'border-gray-100 hover:border-gray-200'}`}
             >
                 {/* Checkbox Icon */}
-                <div className={`mt-0.5 transition-colors duration-300 ${checked ? 'text-primary' : 'text-gray-400'}`}>
+                <div className={`transition-colors duration-300 ${checked ? 'text-primary' : 'text-gray-400'}`}>
                     <svg className="w-5 h-5" fill={checked ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
                         <rect x="4" y="4" width="16" height="16" rx="4" strokeWidth={1.5} />
                         {checked && (

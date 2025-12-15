@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import type { FaceAnalysisResult } from '../../types/analysis';
 import { pickQuestionsForRecord, pickPracticesForRecord } from '../../services/suggestionService';
 import { PracticeCheckbox } from '../../components/ui/PracticeCheckbox';
+import { calculateFiveDimensions } from '../history/historyStats';
+import { RadarChart5D } from '../history/RadarChart5D';
 
 
 interface ReportViewProps {
@@ -12,8 +14,12 @@ interface ReportViewProps {
 }
 
 export function ReportView({ result, image, onRetake, onSaveNote }: ReportViewProps) {
+    const [showShare, setShowShare] = useState(false);
     const [note, setNote] = useState('');
+    const [expandMetrics, setExpandMetrics] = useState(false);
 
+    // Calculate 5 Dimensions
+    const fiveDimensions = useMemo(() => calculateFiveDimensions(result.emotion), [result.emotion]);
     const dateStr = new Date(result.timestamp).toLocaleDateString('zh-CN', {
         weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
     });
@@ -84,9 +90,10 @@ export function ReportView({ result, image, onRetake, onSaveNote }: ReportViewPr
                     ))}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                    <ScoreCard label="精力值" value={result.emotion.energy_level} />
-                    <ScoreCard label="心情亮度" value={result.emotion.mood_brightness} />
+                <div className="grid grid-cols-3 gap-3 mb-3">
+                    <ScoreCard label="精力值" value={result.emotion.energy_level} compact />
+                    <ScoreCard label="心情亮度" value={result.emotion.mood_brightness} compact />
+                    <ScoreCard label="气色值" value={result.emotion.vitality_score || 0} compact />
                 </div>
 
                 <div className="bg-bg-panel p-3 rounded-2xl border border-border-soft">
@@ -96,42 +103,146 @@ export function ReportView({ result, image, onRetake, onSaveNote }: ReportViewPr
                 </div>
             </section>
 
-            {/* 2. Skin & Lifestyle Hints */}
+            {/* 1.5 Face Wellness 5D - Radar + Interpretation */}
+            <section className="bg-white p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 flex flex-col items-center transition-all duration-300">
+                <div className="w-full flex items-center gap-2 mb-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-pink-400"></span>
+                    <h3 className="text-sm font-bold text-text-subtle tracking-widest">五维状态分析</h3>
+                </div>
+
+                <div className="py-2">
+                    <RadarChart5D data={fiveDimensions} size={260} />
+                </div>
+
+                {/* Expand Toggle */}
+                <button
+                    onClick={() => setExpandMetrics(!expandMetrics)}
+                    className="flex flex-col items-center gap-1 mt-0 group"
+                >
+                    <span className="text-xs text-gray-400 group-hover:text-primary transition-colors">
+                        {expandMetrics ? "收起详细指标" : "展开 10 项详细指标"}
+                    </span>
+                    <div className={`w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/10 ${expandMetrics ? 'rotate-180' : ''}`}>
+                        <svg className="w-4 h-4 text-gray-400 group-hover:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                </button>
+
+                {/* Collapsible Metrics Grid */}
+                <div className={`w-full overflow-hidden transition-all duration-500 ease-in-out ${expandMetrics ? 'max-h-[800px] opacity-100 mt-6' : 'max-h-0 opacity-0 mt-0'}`}>
+                    <div className="space-y-4 pb-2">
+
+                        {/* 1. Core Vitality */}
+                        <div>
+                            <h4 className="text-xs font-bold text-orange-400 mb-2 ml-1">
+                                核心活力
+                            </h4>
+                            <div className="grid grid-cols-2 gap-2">
+                                <DetailMetricItem label="精力" value={result.emotion.energy_level} icon="⚡️" category="vitality" />
+                                <DetailMetricItem label="气色" value={result.emotion.vitality_score} icon="🌟" category="vitality" />
+                            </div>
+                        </div>
+
+                        {/* 2. Physio Balance */}
+                        <div>
+                            <h4 className="text-xs font-bold text-purple-400 mb-2 ml-1">
+                                生理平衡
+                            </h4>
+                            <div className="grid grid-cols-2 gap-2">
+                                <DetailMetricItem label="压力" value={result.emotion.stress_level} icon="🔴" reverse category="physio" />
+                                <DetailMetricItem label="疲劳" value={result.emotion.fatigue_level} icon="🟡" reverse category="physio" />
+                                <DetailMetricItem label="困倦" value={result.emotion.sleepiness_level} icon="🔵" reverse category="physio" />
+                            </div>
+                        </div>
+
+                        {/* 3. Emotional Valence */}
+                        <div>
+                            <h4 className="text-xs font-bold text-rose-400 mb-2 ml-1">
+                                情绪效价
+                            </h4>
+                            <div className="grid grid-cols-2 gap-2">
+                                <DetailMetricItem label="心情" value={result.emotion.mood_brightness} icon="☁️" category="emotion" />
+                                <DetailMetricItem label="平静" value={result.emotion.calmness_score} icon="🌊" category="emotion" />
+                            </div>
+                        </div>
+
+                        {/* 4. Cognitive Readiness */}
+                        <div>
+                            <h4 className="text-xs font-bold text-cyan-500 mb-2 ml-1">
+                                认知就绪
+                            </h4>
+                            <div className="grid grid-cols-2 gap-2">
+                                <DetailMetricItem label="专注" value={result.emotion.focus_score} icon="🧠" category="cognitive" />
+                            </div>
+                        </div>
+
+                        {/* 5. Social Radiance */}
+                        <div>
+                            <h4 className="text-xs font-bold text-amber-500 mb-2 ml-1">
+                                社交光彩
+                            </h4>
+                            <div className="grid grid-cols-2 gap-2">
+                                <DetailMetricItem label="亲和" value={result.emotion.approachability_score} icon="🤝" category="social" />
+                                <DetailMetricItem label="自信" value={result.emotion.confidence_score} icon="🦁" category="social" />
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            {/* 2. Skin Diagnosis */}
             <section className="bg-white p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100">
                 <div className="flex items-center gap-2 mb-4">
                     <span className="w-1.5 h-1.5 rounded-full bg-purple-400/60"></span>
-                    <h3 className="text-sm font-bold text-text-subtle tracking-widest">皮肤与生活方式提示</h3>
+                    <h3 className="text-sm font-bold text-text-subtle tracking-widest">皮肤诊断</h3>
+                </div>
+
+                <div className="grid grid-cols-1 gap-2">
+                    {result.lifestyle.signals.map((signal, idx) => (
+                        <div key={idx} className="flex items-center gap-3 p-3 bg-purple-50/50 border border-purple-100/50 rounded-xl hover:bg-purple-50 transition-colors">
+                            <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-purple-100/50 text-purple-500">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <circle cx="12" cy="12" r="2" fill="currentColor"></circle>
+                                </svg>
+                            </span>
+                            <span className="text-sm text-gray-700 font-medium">{signal}</span>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="pt-3 px-1 mt-2">
+                    <p className="text-[10px] text-gray-400 italic text-center">
+                        {result.lifestyle.disclaimer}
+                    </p>
+                </div>
+            </section>
+
+            {/* 3. Lifestyle Analysis */}
+            <section className="bg-white p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100">
+                <div className="flex items-center gap-2 mb-4">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-400/60"></span>
+                    <h3 className="text-sm font-bold text-text-subtle tracking-widest">生活方式探查</h3>
                 </div>
 
                 <div className="space-y-4">
-                    <div>
-                        <h4 className="text-sm font-semibold text-text-main mb-2">可见的生活方式线索</h4>
-                        <ul className="space-y-1">
-                            {result.lifestyle.signals.map((signal, idx) => (
-                                <li key={idx} className="text-sm text-text-subtle flex items-start gap-2">
-                                    <span className="text-accent mt-1">•</span>
-                                    {signal}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    <div>
-                        <h4 className="text-sm font-semibold text-text-main mb-2">今天可以温柔地对自己做这些小事：</h4>
-                        <ul className="space-y-1">
-                            {result.lifestyle.suggestions.map((sugg, idx) => (
-                                <li key={idx} className="text-sm text-text-subtle flex items-start gap-2">
-                                    <span className="text-accent mt-1">✓</span>
-                                    {sugg}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    <div className="pt-2 border-t border-border-soft/50">
-                        <p className="text-[10px] text-text-subtle italic opacity-70">
-                            {result.lifestyle.disclaimer}
-                        </p>
+                    <div className="space-y-3">
+                        {result.lifestyle.suggestions.map((sugg, idx) => (
+                            <div key={idx} className="flex items-center gap-3 p-3 bg-green-50/50 border border-green-100/50 rounded-xl hover:bg-green-50 hover:shadow-sm transition-all duration-300">
+                                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-green-100/50 text-green-600 flex items-center justify-center border border-green-200/50">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"></path>
+                                    </svg>
+                                </div>
+                                <div className="flex-1 py-1">
+                                    <p className="text-sm text-gray-700 leading-relaxed font-medium">
+                                        {sugg}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </section>
@@ -143,17 +254,25 @@ export function ReportView({ result, image, onRetake, onSaveNote }: ReportViewPr
                     <h3 className="text-sm font-bold text-text-subtle tracking-widest">自我观察与提问</h3>
                 </div>
 
-                <h4 className="text-sm font-semibold text-text-main mb-3">给今天的你，一点点温柔的提问:</h4>
-                <ul className="space-y-3">
+                <div className="space-y-3">
                     {(result.reflection.questions && result.reflection.questions.length > 0
                         ? result.reflection.questions
                         : pickQuestionsForRecord({ emotion: result.emotion })
                     ).map((q, idx) => (
-                        <li key={idx} className="bg-bg-panel p-3 rounded-2xl text-sm text-text-main border border-border-soft">
-                            {q}
-                        </li>
+                        <div key={idx} className="flex items-center gap-3 p-3 bg-blue-50/50 border border-blue-100/50 rounded-xl hover:bg-blue-50 hover:shadow-sm transition-all duration-300">
+                            <div className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100/50 text-blue-600 flex items-center justify-center border border-blue-200/50">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                </svg>
+                            </div>
+                            <div className="flex-1 py-1">
+                                <p className="text-sm text-gray-700 leading-relaxed font-medium">
+                                    {q}
+                                </p>
+                            </div>
+                        </div>
                     ))}
-                </ul>
+                </div>
             </section>
 
             {/* Micro-Practices Section (New) */}
@@ -210,25 +329,71 @@ export function ReportView({ result, image, onRetake, onSaveNote }: ReportViewPr
                 </button>
             </div>
 
-        </div>
+        </div >
     );
 }
 
-function ScoreCard({ label, value }: { label: string; value: number }) {
+function ScoreCard({ label, value, compact = false }: { label: string; value: number; compact?: boolean }) {
     const widthPct = `${value * 10}%`;
 
     return (
-        <div className="bg-gray-50 p-4 rounded-2xl flex flex-col items-start border border-gray-100/50 hover:bg-white hover:shadow-sm transition-all duration-300">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-text-subtle/70 mb-2">{label}</span>
+        <div className={`rounded-2xl flex flex-col items-start border border-gray-100/50 hover:bg-white hover:shadow-sm transition-all duration-300 ${compact ? 'p-3 bg-gray-100/70' : 'bg-gray-50 p-4'}`}>
+            <span className={`font-bold uppercase tracking-wider text-text-subtle/70 mb-1 ${compact ? 'text-[9px]' : 'text-[10px] mb-2'}`}>{label}</span>
             <div className="flex items-baseline gap-1.5 w-full">
-                <span className="text-3xl font-bold text-gray-800 leading-none tracking-tight">{value}</span>
-                <span className="text-xs text-text-subtle font-medium">/10</span>
+                <span className={`font-bold text-gray-800 leading-none tracking-tight ${compact ? 'text-2xl' : 'text-3xl'}`}>{value}</span>
+                <span className="text-[10px] text-text-subtle font-medium">/10</span>
             </div>
-            <div className="w-full h-1.5 bg-gray-200/50 rounded-full mt-3 overflow-hidden">
+            <div className={`w-full bg-gray-200/50 rounded-full overflow-hidden ${compact ? 'h-1 mt-2' : 'h-1.5 mt-3'}`}>
                 <div
                     style={{ width: widthPct }}
                     className={`h-full rounded-full shadow-sm transition-all duration-1000 ease-out ${value > 7 ? 'bg-gradient-to-r from-green-400 to-emerald-500' : value > 4 ? 'bg-gradient-to-r from-yellow-400 to-orange-400' : 'bg-gradient-to-r from-gray-400 to-gray-500'}`}
                 />
+            </div>
+        </div>
+    );
+}
+
+type MetricCategory = 'vitality' | 'emotion' | 'cognitive' | 'physio' | 'social' | 'default';
+
+function DetailMetricItem({ label, value, icon, reverse = false, category = 'default' }: { label: string, value?: number, icon: string, reverse?: boolean, category?: MetricCategory }) {
+    // Treat null/undefined as missing. 0 is a valid value.
+    const isMissing = value === undefined || value === null;
+    const val = value ?? 0;
+
+    let colorClass = "text-text-main";
+    if (reverse) {
+        if (val >= 7) colorClass = "text-rose-500";
+        else if (val >= 4) colorClass = "text-amber-500";
+        else colorClass = "text-green-600";
+    } else {
+        if (val >= 7) colorClass = "text-green-600";
+        else if (val >= 4) colorClass = "text-blue-500";
+        else colorClass = "text-gray-500";
+    }
+
+    // Override color if missing
+    if (isMissing) colorClass = "text-gray-300";
+
+    // Theme Styles
+    const themes: Record<MetricCategory, string> = {
+        vitality: "bg-orange-50/50 border-orange-100/50 hover:bg-orange-50 hover:border-orange-100",
+        emotion: "bg-rose-50/50 border-rose-100/50 hover:bg-rose-50 hover:border-rose-100",
+        cognitive: "bg-cyan-50/50 border-cyan-100/50 hover:bg-cyan-50 hover:border-cyan-100",
+        physio: "bg-purple-50/50 border-purple-100/50 hover:bg-purple-50 hover:border-purple-100",
+        social: "bg-amber-50/50 border-amber-100/50 hover:bg-amber-50 hover:border-amber-100",
+        default: "bg-gray-50 border-gray-100 hover:bg-white"
+    };
+
+    const themeClass = themes[category] || themes.default;
+
+    return (
+        <div className={`flex items-center justify-between p-2.5 rounded-xl border transition-colors ${themeClass}`}>
+            <div className="flex items-center gap-2">
+                <span className="text-sm">{icon}</span>
+                <span className="text-xs font-medium text-text-subtle">{label}</span>
+            </div>
+            <div className={`text-sm font-bold ${colorClass}`}>
+                {isMissing ? "-" : val.toFixed(1)}
             </div>
         </div>
     );

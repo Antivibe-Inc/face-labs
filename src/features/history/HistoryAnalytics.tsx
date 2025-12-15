@@ -1,6 +1,7 @@
 
 import { useState, useMemo } from 'react';
 import type { FaceHistoryRecord } from '../../services/historyStore';
+import { RadarChart5D } from './RadarChart5D';
 
 interface AnalyticsProps {
     history: FaceHistoryRecord[];
@@ -494,7 +495,7 @@ export function WeeklyRhythmCard({ history }: AnalyticsProps) {
     // Find peak day (highest energy or lowest stress depending on mode?)
     // For simplicity, keep it about "Best State" (Energy) for now, or maybe "Highest Stress" for physio?
     // Let's stick to Energy for the highlight to be positive.
-    const validDays = data.filter(d => d.count > 0);
+    // const validDays = data.filter(d => d.count > 0);
     // const peakDay = validDays.length > 0 ? validDays.sort((a, b) => b.energy - a.energy)[0] : null;
 
     return (
@@ -613,3 +614,97 @@ export function WeeklyRhythmCard({ history }: AnalyticsProps) {
     );
 }
 
+// --- Face Wellness 5D Card ---
+
+export function FaceWellnessCard({ history }: AnalyticsProps) {
+    const stats = useMemo(() => {
+        const cutoff = getDaysAgo(30);
+        const relevant = history.filter(r => new Date(r.date) >= cutoff);
+
+        if (relevant.length === 0) return null;
+
+        // Calculate Aggregates for 5 Wellness Dimensions using system definition
+        const sum = relevant.reduce((acc, r) => {
+            // 1. Core Vitality (Energy + Vitality)
+            const energy = r.emotion.energy_level || 0;
+            const vitality = r.emotion.vitality_score || 0;
+            const dimVitality = (energy + vitality) / 2;
+
+            // 2. Physio Balance (10 - Avg(Stress, Fatigue, Sleepiness)) -> High is Good
+            const stress = r.emotion.stress_level || 0;
+            const fatigue = r.emotion.fatigue_level || 0;
+            const sleepiness = r.emotion.sleepiness_level || 0;
+            // Handle missing physio data gracefully if 0 (though 0 is a valid score, usually it means missing in old data)
+            // But here we treat 0 as 0 load (perfect state). That's acceptable.
+            const avgLoad = (stress + fatigue + sleepiness) / 3;
+            const dimPhysio = Math.max(0, 10 - avgLoad);
+
+            // 3. Emotional Valence (Mood + Calmness)
+            const mood = r.emotion.mood_brightness || 0;
+            const calmness = r.emotion.calmness_score || 0;
+            const dimEmotion = (mood + calmness) / 2;
+
+            // 4. Cognitive Readiness (Focus)
+            const dimCognitive = r.emotion.focus_score || 0;
+
+            // 5. Social Radiance (Approachability + Confidence)
+            const approachability = r.emotion.approachability_score || 0;
+            const confidence = r.emotion.confidence_score || 0;
+            const dimSocial = (approachability + confidence) / 2;
+
+            return {
+                vitality: acc.vitality + dimVitality,
+                physio: acc.physio + dimPhysio,
+                emotion: acc.emotion + dimEmotion,
+                cognitive: acc.cognitive + dimCognitive,
+                social: acc.social + dimSocial,
+            };
+        }, { vitality: 0, physio: 0, emotion: 0, cognitive: 0, social: 0 });
+
+        const count = relevant.length;
+
+        return {
+            vitality: sum.vitality / count,
+            physio: sum.physio / count,
+            emotion: sum.emotion / count,
+            cognitive: sum.cognitive / count,
+            social: sum.social / count,
+        };
+    }, [history]);
+
+    // Use dummy data if no history
+    const chartData = stats || { vitality: 5, physio: 5, emotion: 5, cognitive: 5, social: 5 };
+
+    return (
+        <div className="bg-white rounded-3xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-6 mb-4 flex flex-col items-center">
+            <div className="w-full flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-pink-400"></span>
+                    <h3 className="text-sm font-semibold text-text-main">五维面部状态 (Face Wellness)</h3>
+                </div>
+                {!stats && <span className="text-[10px] text-text-subtle bg-gray-100 px-2 py-1 rounded-full">暂无足够数据 (显示示例)</span>}
+            </div>
+
+            <div className="py-4">
+                <RadarChart5D data={chartData} size={240} />
+            </div>
+
+            <div className="text-xs text-text-subtle text-center max-w-[90%] leading-relaxed space-y-2 mt-2">
+                <p>
+                    {stats
+                        ? "五维模型通过整合 10 项细分指标，全面扫描您的状态。"
+                        : "开始记录每日面部状态，点亮 Core Vitality 等五大核心维度。"}
+                </p>
+                {stats && (
+                    <div className="flex flex-wrap justify-center gap-2 text-[10px] text-gray-400">
+                        <span>⚡️核心活力</span>
+                        <span>🧠认知就绪</span>
+                        <span>☀️社交光彩</span>
+                        <span>☁️情绪效价</span>
+                        <span>⚖️生理平衡</span>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}

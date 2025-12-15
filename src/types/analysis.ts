@@ -5,6 +5,12 @@ export interface EmotionData {
     stress_level?: number; // 0-10 (New)
     fatigue_level?: number; // 0-10 (New)
     sleepiness_level?: number; // 0-10 (New: based on eye bags, puffiness)
+    // Face Wellness 5D Metrics
+    vitality_score?: number;      // 气色值 (Core Vitality)
+    calmness_score?: number;      // 平静度 (Emotional Valence)
+    focus_score?: number;         // 专注力 (Cognitive Readiness)
+    approachability_score?: number; // 亲和力 (Social Radiance)
+    confidence_score?: number;    // 自信度 (Social Radiance)
     tags: string[]; // 1-4 short strings
     today_suggestion: string;
     // AI Dynamic Suggestions

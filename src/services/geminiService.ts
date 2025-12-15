@@ -5,6 +5,12 @@ export interface GeminiFaceAnalysis {
     stress_level?: number;
     fatigue_level?: number;
     sleepiness_level?: number;
+    // New 5D Metrics
+    vitality_score?: number;
+    calmness_score?: number;
+    focus_score?: number;
+    approachability_score?: number;
+    confidence_score?: number;
     tags: string[];
     skin_signals?: string[];
     lifestyle_hints?: string[];
@@ -17,6 +23,7 @@ export interface GeminiFaceAnalysis {
     deep_reasoning?: string; // 综合推理链
     suggested_questions?: string[]; // AI生成的反思问题
     suggested_plans?: string[]; // AI生成的微行动
+    suggestion?: string; // A general suggestion field, used for today_suggestion
 }
 
 // Mapper to convert Gemini response to App internal format
@@ -30,7 +37,13 @@ export function mapGeminiToAppResult(gemini: GeminiFaceAnalysis): any {
             fatigue_level: gemini['fatigue_level'] || 0,
             sleepiness_level: gemini['sleepiness_level'] || 0,
             tags: gemini.tags,
-            today_suggestion: gemini.environment_context || "保持当下的状态。"
+            // 5D Metrics extraction (Allow undefined if missing)
+            vitality_score: gemini.vitality_score,
+            calmness_score: gemini.calmness_score,
+            focus_score: gemini.focus_score,
+            approachability_score: gemini.approachability_score,
+            confidence_score: gemini.confidence_score,
+            today_suggestion: gemini.suggestion || "保持微笑，继续加油！"
         },
         lifestyle: {
             signals: gemini.skin_signals || [],
@@ -153,11 +166,18 @@ export async function callGeminiAnalysis(image: File | string): Promise<GeminiFa
 
 基于上述观察，请输出一个 JSON 对象：
 
-- energy_level (0-10): 综合生理能量。结合眼神光彩和肌肉张力判断。
-- mood_brightness (0-10): 综合情绪亮度。结合环境氛围和微表情判断。
-- stress_level (0-10): 压力值。观察眉间紧绷度、咬肌状态。
-- fatigue_level (0-10): 疲劳度。观察眼神聚焦度、面部肌肉松弛度。
-- sleepiness_level (0-10): 困倦/缺觉指数。重点观察黑眼圈、眼袋、面部浮肿程度。
+- energy_level (0-10): **精力值**。观察眼神光彩和肌肉张力。0-3(低):眼神涣散/眼皮沉重；4-6(中):眼神正常/无强烈光彩；7-10(高):眼神炯炯有神/肌肉紧致。
+- mood_brightness (0-10): **心情亮度**。观察嘴角和环境氛围。0-3(低):不悦/悲伤/嘴角下撇；4-6(中):平静/礼貌性微笑；7-10(高):明显开心/大笑/眼神飞扬。
+- stress_level (0-10): **压力值**。观察眉间纹和咬肌。0-3(低):面部舒展/无紧绷；4-6(中):眉间轻微皱褶/嘴角用力；7-10(高):咬肌突出/额头紧皱/苦瓜脸。
+- fatigue_level (0-10): **疲劳度**。观察肌肉下垂程度。0-3(低):精力充沛；4-6(中):眼神略显疲态；7-10(高):累瘫感/眼袋明显下垂/面部松弛。
+- sleepiness_level (0-10): **困倦感**。观察眼睛开合度。0-3(清醒):眼睛睁大；4-6(微困):眼睑略下垂/打哈欠；7-10(极困):眼睛快要闭上。
+
+- vitality_score (0-10): **气色值 (Glow)**。观察皮肤状态。0-3(低):脸色苍白/蜡黄/暗沉/黑眼圈深；4-6(中):肤色正常/无高光；7-10(高):皮肤有光泽/白里透红/健康感强。
+- calmness_score (0-10): **平静度 (Stability)**。观察情绪波动。0-3(焦虑):眉间紧锁/眼神游离/不安；4-6(中):正常放松；7-10(宁静):面部有定力/眼神深邃稳定/从容。
+- focus_score (0-10): **专注力 (Focus)**。观察眼神聚焦。0-3(涣散):眼神空洞/四处张望；4-6(一般):配合拍照感；7-10(聚焦):目光如炬/有穿透力/在审视。
+- approachability_score (0-10): **亲和力 (Openness)**。观察开放度。0-3(冷漠):表情严肃/防御性强；4-6(随和):不排斥但也不热情；7-10(热情):真诚微笑(Duchenne)/令人想亲近。
+- confidence_score (0-10): **自信度 (Power)**。观察姿态气场。0-3(畏缩):低头含胸/眼神闪躲；4-6(正常):平视自然；7-10(强大):昂首挺胸/直视镜头/掌控感强。
+
 - tags (3-5个): 极具画面感的中文短语。如"深夜emo"、"强撑的疲惫"、"松弛感"、"眼神清澈"。相比之前的形容词，要更具体。
 - skin_signals (Array): 具体的生理特征。
 - environment_context (String): 一句话描述环境氛围与光线对情绪的潜在影响。
@@ -337,6 +357,12 @@ ${transcriptContext}
 - stress_level (0-10)
 - fatigue_level (0-10)
 - sleepiness_level (0-10)
+- vitality_score (0-10): **气色值**。重点观察两点：1.皮肤的光泽感与血色（Rosiness/Glow）；2.整张脸透出的“生命力”（Vibrancy）。苍白、暗沉或死气沉沉得0-4分；红润、有光泽、生机勃勃得7-10分。
+- calmness_score (0-10): **平静度**。观察面部肌肉的“静止感”。眉间无紧锁、嘴角无紧绷、眼神不游离。焦虑不安得0-4分；安详、定以从容得7-10分。
+- focus_score (0-10): **专注力**。观察眼神的“穿透力”与聚焦感（Gaze Intensity）。眼神涣散空洞得0-4分；目光如炬、若有所思得7-10分。
+- approachability_score (0-10): **亲和力**。观察面部的“开放度”。是否面带微笑？表情是否柔和？拒人千里或冷漠得0-4分；温暖、友善、令人想亲近得7-10分。
+- confidence_score (0-10): **自信度**。观察头颈姿态与眼神的“坚定感”。畏缩、闪躲得0-4分；昂扬、坚定、气场强大得7-10分。
+
 - emotion_summary: String, **情绪快照**。用简短、有诗意的语言总结当下的状态（如“过度兴奋后的疲惫”、“平静的内耗”）。
 - tags (2-4个标签)
 - skin_signals (数组)

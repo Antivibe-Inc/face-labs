@@ -47,6 +47,13 @@ function generateMockRecord(date: Date): FaceHistoryRecord {
             stress_level: getRandomInt(1, 8),
             fatigue_level: getRandomInt(1, 9),
             sleepiness_level: getRandomInt(1, 8),
+            // 5D Metrics
+            vitality_score: getRandomInt(4, 10),
+            calmness_score: getRandomInt(3, 10),
+            focus_score: getRandomInt(3, 10),
+            approachability_score: getRandomInt(3, 10),
+            confidence_score: getRandomInt(3, 10),
+
             today_suggestion: "Mock suggestion",
         },
         lifestyle: {
@@ -101,9 +108,9 @@ export function SettingsTesting() {
 
         const now = new Date();
 
-        const firstRecord = generateMockRecord(new Date()); // Generate one just to show structure in alert logic (approx) but better to capture from loop
+        // const firstRecord = generateMockRecord(new Date()); // Generate one just to show structure in alert logic (approx) but better to capture from loop
 
-        let lastRecord: FaceHistoryRecord | null = null;
+        // let lastRecord: FaceHistoryRecord | null = null;
 
         for (let i = 0; i < days; i++) {
             // Generate 1-2 records per day
@@ -117,7 +124,7 @@ export function SettingsTesting() {
 
                 const record = generateMockRecord(d);
                 saveRecord(record, { ignoreDailyLimit: true });
-                lastRecord = record;
+                // lastRecord = record;
             }
         }
 

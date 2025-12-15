@@ -128,3 +128,52 @@ export function buildWeeklySummary(stats: WeeklyStats): WeeklySummary {
 
     return { title, description, tips };
 }
+
+// --- Face Wellness 5D Logic ---
+
+export interface WellnessDimensions {
+    vitality: number;      // 核心活力 (Vitality + Energy)
+    physio: number;        // 生理平衡 (10 - Load)
+    emotion: number;       // 情绪效价 (Mood + Calmness)
+    cognitive: number;     // 认知就绪 (Focus)
+    social: number;        // 社交光彩 (Approachability + Confidence)
+}
+
+export function calculateFiveDimensions(emotion: any): WellnessDimensions {
+    if (!emotion) {
+        return { vitality: 5, physio: 5, emotion: 5, cognitive: 5, social: 5 };
+    }
+
+    // 1. Core Vitality (Energy + Vitality)
+    const energy = emotion.energy_level || 0;
+    const vitality = emotion.vitality_score || 0;
+    const dimVitality = (energy + vitality) / 2;
+
+    // 2. Physio Balance (10 - Avg(Stress, Fatigue, Sleepiness)) -> High is Good
+    const stress = emotion.stress_level || 0;
+    const fatigue = emotion.fatigue_level || 0;
+    const sleepiness = emotion.sleepiness_level || 0;
+    const avgLoad = (stress + fatigue + sleepiness) / 3;
+    const dimPhysio = Math.max(0, 10 - avgLoad);
+
+    // 3. Emotional Valence (Mood + Calmness)
+    const mood = emotion.mood_brightness || 0;
+    const calmness = emotion.calmness_score || 0;
+    const dimEmotion = (mood + calmness) / 2;
+
+    // 4. Cognitive Readiness (Focus)
+    const dimCognitive = emotion.focus_score || 0;
+
+    // 5. Social Radiance (Approachability + Confidence)
+    const approachability = emotion.approachability_score || 0;
+    const confidence = emotion.confidence_score || 0;
+    const dimSocial = (approachability + confidence) / 2;
+
+    return {
+        vitality: dimVitality,
+        physio: dimPhysio,
+        emotion: dimEmotion,
+        cognitive: dimCognitive,
+        social: dimSocial
+    };
+}

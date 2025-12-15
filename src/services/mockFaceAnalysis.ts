@@ -14,9 +14,15 @@ export async function analyzeFaceMock(_image: File | string): Promise<FaceAnalys
                 mood_brightness: 6,
                 stress_level: 6,
                 fatigue_level: 7,
-                sleepiness_level: 8,
-                tags: ["平静", "略疲惫", "稳重"],
-                today_suggestion: "今天比较适合安静处理一些不太紧急的事情，少安排高冲突的沟通。"
+                sleepiness_level: Math.floor(Math.random() * 4) + 1, // 1-4
+                // 5D Face Wellness (Randomized for variety)
+                vitality_score: Math.floor(Math.random() * 6) + 4, // 4-10
+                calmness_score: Math.floor(Math.random() * 8) + 2, // 2-10
+                focus_score: Math.floor(Math.random() * 7) + 3,    // 3-10
+                approachability_score: Math.floor(Math.random() * 7) + 3, // 3-10
+                confidence_score: Math.floor(Math.random() * 8) + 2, // 2-10
+                tags: getRandomTags(3),
+                today_suggestion: "Made up suggestion for testing."
             },
             lifestyle: {
                 signals: ["眼下有些暗沉，可能暗示最近睡眠不是特别充足。", "眉头有一点点紧绷，可能带着些许心事。"],
@@ -80,4 +86,15 @@ export async function analyzeFaceMock(_image: File | string): Promise<FaceAnalys
         ...profile,
         timestamp: Date.now()
     };
+}
+
+function getRandomTags(count: number): string[] {
+    const pool = [
+        "平静", "焦虑", "开心", "疲惫", "专注", "走神",
+        "兴奋", "低落", "困倦", "清醒", "紧张", "松弛",
+        "自信", "犹豫", "友善", "冷漠", "热情", "内敛"
+    ];
+    // Shuffle and pick
+    const shuffled = pool.sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
 }

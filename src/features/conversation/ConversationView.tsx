@@ -129,7 +129,13 @@ export function ConversationView({ image, preliminaryAnalysis, pastRecords = [],
                     fatigue_level: rawResult.fatigue_level || preliminaryAnalysis.fatigue_level || 0,
                     sleepiness_level: rawResult.sleepiness_level || preliminaryAnalysis.sleepiness_level || 0,
                     tags: rawResult.tags,
-                    today_suggestion: rawResult.today_suggestion || "好好休息"
+                    today_suggestion: rawResult.today_suggestion || "好好休息",
+                    // 5D Metrics (Allow undefined to pass through)
+                    vitality_score: rawResult.vitality_score ?? preliminaryAnalysis.vitality_score,
+                    calmness_score: rawResult.calmness_score ?? preliminaryAnalysis.calmness_score,
+                    focus_score: rawResult.focus_score ?? preliminaryAnalysis.focus_score,
+                    approachability_score: rawResult.approachability_score ?? preliminaryAnalysis.approachability_score,
+                    confidence_score: rawResult.confidence_score ?? preliminaryAnalysis.confidence_score
                 },
                 lifestyle: {
                     signals: rawResult.skin_signals || [],
@@ -157,7 +163,13 @@ export function ConversationView({ image, preliminaryAnalysis, pastRecords = [],
                     energy_level: preliminaryAnalysis.energy_level,
                     mood_brightness: preliminaryAnalysis.mood_brightness,
                     tags: preliminaryAnalysis.tags,
-                    today_suggestion: "休息一下"
+                    today_suggestion: "休息一下",
+                    // 5D Metrics Fallback
+                    vitality_score: preliminaryAnalysis.vitality_score || 5,
+                    calmness_score: preliminaryAnalysis.calmness_score || 5,
+                    focus_score: preliminaryAnalysis.focus_score || 5,
+                    approachability_score: preliminaryAnalysis.approachability_score || 5,
+                    confidence_score: preliminaryAnalysis.confidence_score || 5
                 },
                 lifestyle: {
                     signals: preliminaryAnalysis.skin_signals || [],
