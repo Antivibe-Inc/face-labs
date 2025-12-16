@@ -322,7 +322,7 @@ export function TimelineView() {
 
                         {/* Records in Group */}
                         <div className="space-y-0">
-                            {group.records.map((record, rIdx) => {
+                            {group.records.map((record) => {
                                 const currentIndex = cardRefIndex++;
                                 const isToday = group.key === 'today';
 
