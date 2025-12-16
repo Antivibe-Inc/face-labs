@@ -7,21 +7,42 @@ interface ScanningOverlayProps {
 
 export function ScanningOverlay({ image }: ScanningOverlayProps) {
     const [scanProgress, setScanProgress] = useState(0);
-    const [metrics, setMetrics] = useState<string[]>([]);
+    const [metrics, setMetrics] = useState<{ text: string; time: string }[]>([]);
 
-    // Technical jargon for the metrics display
-    const analysisSteps = [
-        "初始化神经生物特征识别...",
-        "定位主要面部锚点...",
-        "构建 3D 拓扑网格...",
-        "分析皮肤微纹理...",
-        "正在计算情绪向量...",
-        "合成疲劳指数...",
-        "同步生理信号...",
-        "生成初步诊断..."
-    ];
+    const [randomPoints, setRandomPoints] = useState<{ top: string; left: string; animationDuration: string; animationDelay: string }[]>([]);
+    const [randomStats, setRandomStats] = useState<{ bio: string; energy: string; symmetry: string }>({ bio: "0.00", energy: "0.00", symmetry: "0.00" });
 
     useEffect(() => {
+        // Generate static random values for the overlay elements
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        setRandomPoints(Array.from({ length: 12 }).map(() => ({
+            top: `${30 + Math.random() * 40}%`,
+            left: `${30 + Math.random() * 40}%`,
+            animationDuration: `${1 + Math.random()}s`,
+            animationDelay: `${Math.random()}s`
+        })));
+
+        // Generate random stats once
+        setRandomStats({
+            bio: (85 + Math.random() * 14).toFixed(2),
+            energy: (70 + Math.random() * 25).toFixed(2),
+            symmetry: (92 + Math.random() * 7).toFixed(2)
+        });
+    }, []);
+
+    useEffect(() => {
+        // Technical jargon for the metrics display
+        const analysisSteps = [
+            "初始化神经生物特征识别...",
+            "定位主要面部锚点...",
+            "构建 3D 拓扑网格...",
+            "分析皮肤微纹理...",
+            "正在计算情绪向量...",
+            "合成疲劳指数...",
+            "同步生理信号...",
+            "生成初步诊断..."
+        ];
+
         let stepIndex = 0;
         // Asymptotic approach: approaches 99% but slows down significantly
         // Target roughly 30-40s for Gemni 3 Pro Preview
@@ -29,7 +50,8 @@ export function ScanningOverlay({ image }: ScanningOverlayProps) {
         const startTime = Date.now();
 
         const animInterval = setInterval(() => {
-            const elapsed = Date.now() - startTime;
+            const now = Date.now();
+            const elapsed = now - startTime;
 
             // Formula: fraction = 1 - e^(-t/timeConstant)
             // This ensures it never hits 100% and slows down smoothly
@@ -60,8 +82,8 @@ export function ScanningOverlay({ image }: ScanningOverlayProps) {
             // Special case: After ~23s (85% progress), show the encouragement message
             if (calculatedProgress > 85) {
                 setMetrics(prev => {
-                    if (prev[0] === "接下来跟AI心理师聊几句吧...") return prev;
-                    return ["接下来跟AI心理师聊几句吧...", ...prev].slice(0, 4);
+                    if (prev[0]?.text === "接下来跟AI心理师聊几句吧...") return prev;
+                    return [{ text: "接下来跟AI心理师聊几句吧...", time: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }) }, ...prev].slice(0, 4);
                 });
             }
 
@@ -70,9 +92,10 @@ export function ScanningOverlay({ image }: ScanningOverlayProps) {
                 if (currentStepIndex > stepIndex || stepIndex === 0) {
                     setMetrics(prev => {
                         // Avoid duplicates
-                        if (prev[0] === analysisSteps[currentStepIndex]) return prev;
+                        if (prev[0]?.text === analysisSteps[currentStepIndex]) return prev;
                         // Keep distinct messages
-                        return [analysisSteps[currentStepIndex], ...prev].slice(0, 4);
+                        const timeStr = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                        return [{ text: analysisSteps[currentStepIndex], time: timeStr }, ...prev].slice(0, 4);
                     });
                     stepIndex = currentStepIndex;
                 }
@@ -81,6 +104,9 @@ export function ScanningOverlay({ image }: ScanningOverlayProps) {
 
         return () => clearInterval(animInterval);
     }, []);
+
+    // Initial dummy data for metrics to avoid empty flash if needed, but [] is fine
+    // We changed metrics to be objects { text, time }
 
     return (
         <div className="fixed inset-0 z-[100] bg-[#050505] flex flex-col items-center justify-center overflow-hidden font-mono">
@@ -112,15 +138,15 @@ export function ScanningOverlay({ image }: ScanningOverlayProps) {
 
                     {/* Face Mapping Points - Randomly animated */}
                     <div className="absolute inset-0">
-                        {[...Array(12)].map((_, i) => (
+                        {randomPoints.map((pt, i) => (
                             <div
                                 key={i}
                                 className="absolute w-1 h-1 bg-[#00ffcc] rounded-full shadow-[0_0_8px_#00ffcc]"
                                 style={{
-                                    top: `${30 + Math.random() * 40}%`,
-                                    left: `${30 + Math.random() * 40}%`,
-                                    animation: `ping ${1 + Math.random()}s infinite`,
-                                    animationDelay: `${Math.random()}s`
+                                    top: pt.top,
+                                    left: pt.left,
+                                    animation: `ping ${pt.animationDuration} infinite`,
+                                    animationDelay: pt.animationDelay
                                 }}
                             />
                         ))}
@@ -177,19 +203,19 @@ export function ScanningOverlay({ image }: ScanningOverlayProps) {
 
                     {/* Scrolling Log */}
                     <div className="space-y-1 h-20 overflow-hidden text-[#00ffcc] opacity-90 transition-all duration-300">
-                        {metrics.map((msg, i) => (
+                        {metrics.map((m: any, i) => (
                             <div key={i} className={`flex items-center gap-2 ${i === 0 ? 'text-white font-bold' : 'opacity-60'}`}>
-                                <span className="text-[10px] opacity-50">[{Date.now().toString().slice(-4)}]</span>
-                                <span>{i === 0 ? '> ' : '  '}{msg}</span>
+                                <span className="text-[10px] opacity-50">[{m.time}]</span>
+                                <span>{i === 0 ? '> ' : '  '}{m.text}</span>
                             </div>
                         ))}
                     </div>
 
                     {/* Random flashing data block */}
                     <div className="mt-4 grid grid-cols-3 gap-2 text-[10px] text-[#00ffcc]/40">
-                        <div>生物活性: {(85 + Math.random() * 14).toFixed(2)}</div>
-                        <div>气血能量: {(70 + Math.random() * 25).toFixed(2)}</div>
-                        <div>结构对称: {(92 + Math.random() * 7).toFixed(2)}</div>
+                        <div>生物活性: {randomStats.bio}</div>
+                        <div>气血能量: {randomStats.energy}</div>
+                        <div>结构对称: {randomStats.symmetry}</div>
                     </div>
                 </div>
             </div>

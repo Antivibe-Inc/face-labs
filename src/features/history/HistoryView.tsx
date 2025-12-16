@@ -508,60 +508,52 @@ export function HistoryDetailOverlay({ record, onClose, onSaveNote }: HistoryDet
 
                     {/* Collapsible Metrics Grid */}
                     <div className={`w-full overflow-hidden transition-all duration-500 ease-in-out ${expandMetrics ? 'max-h-[800px] opacity-100 mt-6' : 'max-h-0 opacity-0 mt-0'}`}>
-                        <div className="space-y-4 pb-2">
+                        <div className="space-y-6 pb-2">
 
                             {/* 1. Core Vitality */}
                             <div>
-                                <h4 className="text-xs font-bold text-orange-400 mb-2 ml-1">
-                                    核心活力
-                                </h4>
-                                <div className="grid grid-cols-2 gap-2">
-                                    <DetailMetricItem label="精力" value={record.emotion.energy_level} icon="⚡️" category="vitality" />
-                                    <DetailMetricItem label="气色" value={record.emotion.vitality_score} icon="🌟" category="vitality" />
+                                <h4 className="text-xs font-bold text-orange-400 mb-3 ml-1">核心活力</h4>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <MetricProgressRow icon="⚡️" label="精力" value={record.emotion.energy_level} color="bg-orange-400" />
+                                    <MetricProgressRow icon="🌟" label="气色" value={record.emotion.vitality_score || 0} color="bg-amber-400" />
                                 </div>
                             </div>
 
                             {/* 2. Physio Balance */}
                             <div>
-                                <h4 className="text-xs font-bold text-purple-400 mb-2 ml-1">
-                                    生理平衡
-                                </h4>
-                                <div className="grid grid-cols-2 gap-2">
-                                    <DetailMetricItem label="压力" value={record.emotion.stress_level} icon="🔴" reverse category="physio" />
-                                    <DetailMetricItem label="疲劳" value={record.emotion.fatigue_level} icon="🟡" reverse category="physio" />
-                                    <DetailMetricItem label="困倦" value={record.emotion.sleepiness_level} icon="🔵" reverse category="physio" />
+                                <h4 className="text-xs font-bold text-purple-400 mb-3 ml-1">生理平衡</h4>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <MetricProgressRow icon="🔴" label="压力" value={record.emotion.stress_level || 0} color="bg-red-500" />
+                                    <MetricProgressRow icon="🟡" label="疲劳" value={record.emotion.fatigue_level || 0} color="bg-yellow-500" />
+                                    <div className="col-span-1">
+                                        <MetricProgressRow icon="🔵" label="困倦" value={record.emotion.sleepiness_level || 0} color="bg-blue-400" />
+                                    </div>
                                 </div>
                             </div>
 
                             {/* 3. Emotional Valence */}
                             <div>
-                                <h4 className="text-xs font-bold text-rose-400 mb-2 ml-1">
-                                    情绪效价
-                                </h4>
-                                <div className="grid grid-cols-2 gap-2">
-                                    <DetailMetricItem label="心情" value={record.emotion.mood_brightness} icon="☁️" category="emotion" />
-                                    <DetailMetricItem label="平静" value={record.emotion.calmness_score} icon="🌊" category="emotion" />
+                                <h4 className="text-xs font-bold text-pink-400 mb-3 ml-1">情绪效价</h4>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <MetricProgressRow icon="☁️" label="心情" value={record.emotion.mood_brightness} color="bg-pink-300" />
+                                    <MetricProgressRow icon="🌊" label="平静" value={record.emotion.calmness_score || 0} color="bg-sky-400" />
                                 </div>
                             </div>
 
                             {/* 4. Cognitive Readiness */}
                             <div>
-                                <h4 className="text-xs font-bold text-cyan-500 mb-2 ml-1">
-                                    认知就绪
-                                </h4>
-                                <div className="grid grid-cols-2 gap-2">
-                                    <DetailMetricItem label="专注" value={record.emotion.focus_score} icon="🧠" category="cognitive" />
+                                <h4 className="text-xs font-bold text-cyan-500 mb-3 ml-1">认知就绪</h4>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <MetricProgressRow icon="🧠" label="专注" value={record.emotion.focus_score || 0} color="bg-cyan-400" />
                                 </div>
                             </div>
 
                             {/* 5. Social Radiance */}
                             <div>
-                                <h4 className="text-xs font-bold text-amber-500 mb-2 ml-1">
-                                    社交光彩
-                                </h4>
-                                <div className="grid grid-cols-2 gap-2">
-                                    <DetailMetricItem label="亲和" value={record.emotion.approachability_score} icon="🤝" category="social" />
-                                    <DetailMetricItem label="自信" value={record.emotion.confidence_score} icon="🦁" category="social" />
+                                <h4 className="text-xs font-bold text-amber-500 mb-3 ml-1">社交光彩</h4>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <MetricProgressRow icon="🤝" label="亲和" value={record.emotion.approachability_score || 0} color="bg-yellow-400" />
+                                    <MetricProgressRow icon="🦁" label="自信" value={record.emotion.confidence_score || 0} color="bg-orange-400" />
                                 </div>
                             </div>
 
@@ -735,6 +727,7 @@ export function HistoryDetailOverlay({ record, onClose, onSaveNote }: HistoryDet
         </motion.div>
     );
 }
+
 function HistoryScoreCard({ label, value, compact = false }: { label: string; value: number; compact?: boolean }) {
     const widthPct = `${value * 10}%`;
 
@@ -755,47 +748,18 @@ function HistoryScoreCard({ label, value, compact = false }: { label: string; va
     );
 }
 
-
-type MetricCategory = 'vitality' | 'emotion' | 'cognitive' | 'physio' | 'social' | 'default';
-
-function DetailMetricItem({ label, value, icon, reverse = false, category = 'default' }: { label: string, value?: number, icon: string, reverse?: boolean, category?: MetricCategory }) {
-    const val = value ?? 0; // Handle 0 or undefined
-    // For reverse metrics (low is good), high is bad.
-    // We can color code: 
-    // Normal: High = Green
-    // Reverse: High = Red/Orange
-
-    let colorClass = "text-text-main";
-    if (reverse) {
-        if (val >= 7) colorClass = "text-rose-500";
-        else if (val >= 4) colorClass = "text-amber-500";
-        else colorClass = "text-green-600";
-    } else {
-        if (val >= 7) colorClass = "text-green-600";
-        else if (val >= 4) colorClass = "text-blue-500";
-        else colorClass = "text-gray-500";
-    }
-
-    // Theme Styles
-    const themes: Record<MetricCategory, string> = {
-        vitality: "bg-orange-50/50 border-orange-100/50 hover:bg-orange-50 hover:border-orange-100",
-        emotion: "bg-rose-50/50 border-rose-100/50 hover:bg-rose-50 hover:border-rose-100",
-        cognitive: "bg-cyan-50/50 border-cyan-100/50 hover:bg-cyan-50 hover:border-cyan-100",
-        physio: "bg-purple-50/50 border-purple-100/50 hover:bg-purple-50 hover:border-purple-100",
-        social: "bg-amber-50/50 border-amber-100/50 hover:bg-amber-50 hover:border-amber-100",
-        default: "bg-gray-50 border-gray-100 hover:bg-white"
-    };
-
-    const themeClass = themes[category] || themes.default;
-
+function MetricProgressRow({ icon, label, value, color }: { icon: string, label: string, value: number, color: string }) {
     return (
-        <div className={`flex items-center justify-between p-2.5 rounded-xl border transition-colors ${themeClass}`}>
-            <div className="flex items-center gap-2">
-                <span className="text-sm">{icon}</span>
-                <span className="text-xs font-medium text-text-subtle">{label}</span>
+        <div className="bg-gray-50 rounded-xl p-3 flex flex-col justify-center gap-2 border border-gray-50">
+            <div className="flex justify-between items-center">
+                <div className="flex items-center gap-1.5">
+                    <span className="text-sm opacity-80 shadow-sm">{icon}</span>
+                    <span className="text-xs font-medium text-gray-600">{label}</span>
+                </div>
+                <span className="text-sm font-bold text-gray-800 tabular-nums">{value.toFixed(1)}</span>
             </div>
-            <div className={`text-sm font-bold ${colorClass}`}>
-                {val.toFixed(1)}
+            <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                <div className={`h-full rounded-full ${color}`} style={{ width: `${value * 10}%` }} />
             </div>
         </div>
     );

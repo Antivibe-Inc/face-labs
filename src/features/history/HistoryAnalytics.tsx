@@ -634,8 +634,6 @@ export function FaceWellnessCard({ history }: AnalyticsProps) {
             const stress = r.emotion.stress_level || 0;
             const fatigue = r.emotion.fatigue_level || 0;
             const sleepiness = r.emotion.sleepiness_level || 0;
-            // Handle missing physio data gracefully if 0 (though 0 is a valid score, usually it means missing in old data)
-            // But here we treat 0 as 0 load (perfect state). That's acceptable.
             const avgLoad = (stress + fatigue + sleepiness) / 3;
             const dimPhysio = Math.max(0, 10 - avgLoad);
 

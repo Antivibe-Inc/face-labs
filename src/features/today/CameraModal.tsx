@@ -15,11 +15,12 @@ export function CameraModal({ onPhotoTaken, onCancel }: CameraModalProps) {
     const [capturedImage, setCapturedImage] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
-    // Initial camera setup
-    useEffect(() => {
-        startCamera();
-        return () => stopCamera();
-    }, []);
+    const stopCamera = () => {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            setStream(null);
+        }
+    };
 
     const startCamera = async () => {
         try {
@@ -37,12 +38,11 @@ export function CameraModal({ onPhotoTaken, onCancel }: CameraModalProps) {
         }
     };
 
-    const stopCamera = () => {
-        if (stream) {
-            stream.getTracks().forEach(track => track.stop());
-            setStream(null);
-        }
-    };
+    // Initial camera setup
+    useEffect(() => {
+        startCamera();
+        return () => stopCamera();
+    }, []);
 
     const handleCapture = () => {
         if (!videoRef.current || !canvasRef.current) return;
